@@ -5,7 +5,8 @@ alias s="source ~/.zshrc"
 alias q="killall Terminal"
 alias t="touch"
 alias apr="apachectl restart"
-alias aps="apachectl stop"
+alias apstop="apachectl stop"
+alias aps="apachectl start"
 alias o="open ."
 alias nf="mkdir"
 
@@ -21,7 +22,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.0.1"
+VERSION="v0.1.0"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -42,7 +43,8 @@ jap() {
         echo " q        killall Terminal"
         echo " t        touch"
         echo " apr      apachectl restart"
-        echo " aps      apachectl stop"
+        echo " aps      apachectl start"
+        echo " apstop   apachectl stop"
         echo " o        open ."
         echo " nf       mkdir"
     fi
