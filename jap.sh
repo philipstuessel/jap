@@ -22,7 +22,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.1.0"
+VERSION="v0.1.1"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -52,8 +52,12 @@ jap() {
            source /Users/$(users)/jap/update.sh
     fi
     if [[ "$1" == "gi" ]]; then
-        echo ".DS_Store \n **/.DS_Store" > .gitignore
-        echo "Create ${GREEN}".gitignore"${NC}"
+        if [ ! -f /Users/$USER/jap/.gitignore ]; then
+        echo "Create in /Users/$USER/jap/${GREEN}".gitignore"${NC}"
+        echo ".DS_Store" > /Users/$USER/jap/.gitignore
+        echo "**/.DS_Store" >> /Users/$USER/jap/.gitignore
+        fi
+        cp /Users/$USER/jap/.gitignore $(pwd)/
         echo $(pwd)"/"${GREEN}".gitignore"${NC}
     fi
 }
