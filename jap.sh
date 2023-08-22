@@ -9,6 +9,16 @@ alias apstop="apachectl stop"
 alias aps="apachectl start"
 alias o="open ."
 alias nf="mkdir"
+alias cls="clear"
+alias home="cd ~"
+
+# cd 
+alias ..='cd ..'
+alias ...='cd ../../../'
+alias ....='cd ../../../../'
+alias .....='cd ../../../../'
+alias .4='cd ../../../../'
+alias .5='cd ../../../../..'
 
 #color
 RED='\033[0;31m'
@@ -22,7 +32,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.1.1"
+VERSION="v0.2.0"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -32,24 +42,32 @@ jap() {
     if [[ "$1" == "help" ]]; then
         echo "Usage: jap [options]"
         echo "Options:"
-        echo " help     List the commamds"
-        echo " gi       Create the .gitignore file"
-        echo " update   Update JAP"
+        echo " -v           Version"
+        echo " help         List the commamds"
+        echo " gi           Create the .gitignore file"
+        echo " update       Update JAP"
         echo ""
-        echo "---- workflow (alias)"
-        echo " alias    commands"
+        echo "---- custom commands ----"
+        echo " copy [file]  Copy files to clipboard"
         echo ""
-        echo " s        source ~/.zshrc"
-        echo " q        killall Terminal"
-        echo " t        touch"
-        echo " apr      apachectl restart"
-        echo " aps      apachectl start"
-        echo " apstop   apachectl stop"
-        echo " o        open ."
-        echo " nf       mkdir"
+        echo "---- workflow (alias) ----"
+        echo " alias        commands"
+        echo ""
+        echo " s            source ~/.zshrc"
+        echo " q            killall Terminal"
+        echo " t            touch"
+        echo " apr          apachectl restart"
+        echo " aps          apachectl start"
+        echo " apstop       apachectl stop"
+        echo " o            open ."
+        echo " nf           mkdir"
+        echo " cls          clear"
+        echo " home         cd ~"
+        echo " ..           cd .."
+        echo ""
     fi
     if [[ "$1" == "update" ]]; then
-           source /Users/$(users)/jap/update.sh
+           sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/update.sh)" -- ~/jap
     fi
     if [[ "$1" == "gi" ]]; then
         if [ ! -f /Users/$USER/jap/.gitignore ]; then
@@ -60,4 +78,9 @@ jap() {
         cp /Users/$USER/jap/.gitignore $(pwd)/
         echo $(pwd)"/"${GREEN}".gitignore"${NC}
     fi
+}
+
+copy() {
+    pbcopy < "$1";
+    echo $1' was copied into the clipboard 📋'
 }
