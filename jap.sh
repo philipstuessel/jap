@@ -11,6 +11,7 @@ alias o="open ."
 alias nf="mkdir"
 alias cls="clear"
 alias home="cd ~"
+alias c="code ."
 
 # cd 
 alias ..='cd ..'
@@ -32,7 +33,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.2.0"
+VERSION="v0.2.1"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -62,6 +63,7 @@ jap() {
         echo " o            open ."
         echo " nf           mkdir"
         echo " cls          clear"
+        echo " c            code ."
         echo " home         cd ~"
         echo " ..           cd .."
         echo ""
