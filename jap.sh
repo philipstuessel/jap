@@ -14,10 +14,6 @@ alias home="cd ~"
 alias c="code ."
 
 # cd 
-alias ..='cd ..'
-alias ...='cd ../../../'
-alias ....='cd ../../../../'
-alias .....='cd ../../../../'
 alias .4='cd ../../../../'
 alias .5='cd ../../../../..'
 
@@ -33,7 +29,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.2.1"
+VERSION="v0.3.0"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -48,7 +44,7 @@ jap() {
         echo " gi           Create the .gitignore file"
         echo " update       Update JAP"
         echo ""
-        echo "---- custom commands ----"
+        echo "-------- commands --------"
         echo " copy [file]  Copy files to clipboard"
         echo ""
         echo "---- workflow (alias) ----"
@@ -65,7 +61,7 @@ jap() {
         echo " cls          clear"
         echo " c            code ."
         echo " home         cd ~"
-        echo " ..           cd .."
+        echo " ..4          cd ../../../../"
         echo ""
     fi
     if [[ "$1" == "update" ]]; then
@@ -85,4 +81,19 @@ jap() {
 copy() {
     pbcopy < "$1";
     echo $1' was copied into the clipboard 📋'
+}
+
+
+tpl() {
+    if [[ "$1" == "o" ]]; then
+    open ~/jap/tpl/
+    else
+    if [[ "$1" == "l" ]]; then
+    echo ${UNDERLINE}"---- list all templates ----"${NC}
+    find /Users/$USER/jap/tpl/* -maxdepth 0 -type d -exec basename {} \; | while read dir; do echo -e "\033[0;36m$dir\033[0m"; done
+    else 
+        cp -r ~/jap/tpl/$1/* ./
+        echo "The template ${GREEN}$1${NC} was added"
+    fi
+    fi
 }

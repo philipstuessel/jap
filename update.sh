@@ -16,6 +16,6 @@ echo ${CYAN}"Update JAP 🍜"${NC}
 echo ${BLUE}">>>>>>>"${NC}
 echo $(mkdir -p ~/jap && curl -o ~/jap/jap.sh https://raw.githubusercontent.com/philip-stuessel/jap/main/jap.sh)
 echo ${MAGENTA}"update: jap.sh"${NC}
-echo "source /Users/$(users)/jap/jap.sh"
-echo source ~/.zshrc
+echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
+echo $(source ~/.zshrc)
 echo ${GREEN}"Done"${NC}
