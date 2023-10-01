@@ -19,7 +19,7 @@ echo ${MAGENTA}"install: jap.sh"${NC}
 echo "was installed in: \n"${MAGENTA}$(pwd)${NC}
 echo "\nsource /Users/$(users)/jap/jap.sh" >> ~/.zshrc ""
 echo ${GREEN}"add in ~/.zshrc"${NC}
-echo "source /Users/$(users)/jap/jap.sh"
+echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
 echo "command jap"
 echo source ~/.zshrc
 echo ${GREEN}"Done"${NC}
