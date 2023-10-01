@@ -29,7 +29,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.3.0"
+VERSION="v0.3.1"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" ]]; then
@@ -46,6 +46,9 @@ jap() {
         echo ""
         echo "-------- commands --------"
         echo " copy [file]  Copy files to clipboard"
+        echo " tpl [folder] Paste the folder contents"
+        echo "  ↳ tpl l     List all folder template"
+        echo "  ↳ tpl o     Open the tpl folder"
         echo ""
         echo "---- workflow (alias) ----"
         echo " alias        commands"
