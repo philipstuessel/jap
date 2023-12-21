@@ -29,7 +29,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.4.1"
+VERSION="v0.4.2"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "" || "$1" == "" ]]; then
@@ -57,7 +57,7 @@ jap() {
         echo " alias               commands"
         echo ""
         echo " s                   source ~/.zshrc"
-        echo " q                   kill Terminal"
+        echo " q                   killall Terminal"
         echo " t                   touch"
         echo " apr                 apachectl restart"
         echo " aps                 apachectl start"
