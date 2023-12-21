@@ -14,8 +14,17 @@ NC='\033[0m' # No Color
 
 echo ${CYAN}"Update JAP 🍜"${NC}
 echo ${BLUE}">>>>>>>"${NC}
-echo $(mkdir -p ~/jap && curl -o ~/jap/jap.sh https://raw.githubusercontent.com/philip-stuessel/jap/main/jap.sh)
+echo $(mkdir -p ~/jap && curl -o ~/jap/jap.sh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.sh)
 echo ${MAGENTA}"update: jap.sh"${NC}
 echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
+echo $(mkdir -p ~/jap/plugins/) ${MAGENTA}"create: plugins folder"${NC}
+echo $(mkdir -p ~/jap/plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
+source="/Users/$USER/jap/plugins/source.sh"
+if [ ! -f "$source" ]; then
+    touch "$source"
+    echo ${MAGENTA}"create: source.sh"${NC}
+fi
+echo $(mkdir -p ~/jap/plugins && curl -o ~/jap/plugins/plugins.json https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json)
+echo ${MAGENTA}"install: plugins.json"${NC}
 echo $(source ~/.zshrc)
 echo ${GREEN}"Done"${NC}

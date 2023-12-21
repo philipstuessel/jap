@@ -29,20 +29,23 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.3.1"
+VERSION="v0.4.0"
 
 jap() {
-    if [[ "$1" == "-v" || "$1" == "" ]]; then
+    if [[ "$1" == "-v" || "$1" == "" || "$1" == "" ]]; then
          echo "JAP 🍜"
          echo ${VERSION}
     fi
+
     if [[ "$1" == "help" ]]; then
         echo "Usage: jap [options]"
         echo "Options:"
-        echo " -v           Version"
-        echo " help         List the commamds"
-        echo " gi           Create the .gitignore file"
-        echo " update       Update JAP"
+        echo " -v                    Version"
+        echo " help                  List the commamds"
+        echo " gi                    Create the .gitignore file"
+        echo " update                Update JAP"
+        echo " jap install [plugin]  install the Plugin"
+        echo " jap plugin update     update all Plugins"
         echo ""
         echo "-------- commands --------"
         echo " copy [file]  Copy files to clipboard"
@@ -67,9 +70,11 @@ jap() {
         echo " ..4          cd ../../../../"
         echo ""
     fi
+
     if [[ "$1" == "update" ]]; then
-           sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/update.sh)" -- ~/jap
+           sh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.sh)" -- ~/jap
     fi
+
     if [[ "$1" == "gi" ]]; then
         if [ ! -f /Users/$USER/jap/.gitignore ]; then
         echo "Create in /Users/$USER/jap/${GREEN}".gitignore"${NC}"
@@ -79,13 +84,20 @@ jap() {
         cp /Users/$USER/jap/.gitignore $(pwd)/
         echo $(pwd)"/"${GREEN}".gitignore"${NC}
     fi
+
+    if [[ "$1" == "i" || "$1" == "install" ]]; then
+        installPlugin "$2"
+    fi
+
+    if [[ "$1" == "pu" || "$1" == "plugins update" ]]; then
+        updatePlugin;
+    fi
 }
 
 copy() {
     pbcopy < "$1";
     echo $1' was copied into the clipboard 📋'
 }
-
 
 tpl() {
     if [[ "$1" == "o" ]]; then
@@ -100,3 +112,45 @@ tpl() {
     fi
     fi
 }
+
+installPlugin() {
+         KEY="${1}"
+         FILE="/Users/$USER/jap/plugins/plugins.json"
+         if [ -f "$FILE" ]; then
+             if grep -q "\"${KEY}\"" "$FILE"; then
+                 installURL=$(cat "$FILE" | grep "\"${1}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+                 echo ${BOLD}"JAP 🍜 Plugins"${NC}
+                 echo ${BOLD}"the ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed"${NC}
+                 echo ${BOLD}"install server: $installURL"${NC}
+                 sh -c "$(curl -fsSL $installURL/install.sh)"
+                 echo "source /Users/$USER/jap/plugins/packages/$KEY.sh" >> /Users/$USER/jap/plugins/source.sh
+                 source /Users/$USER/jap/plugins/source.sh
+             else
+                 echo ${RED}"the plugin \"$KEY\" was not found"${NC}
+
+             fi
+         else
+             echo ${RED}"The script \"$FILE\" does not exist"${NC}
+         fi
+}
+
+updatePlugin() {
+FILE="/Users/$USER/jap/plugins/plugins.json"
+echo "JAP 🍜 Plugins Update"
+if [ -f "$FILE" ]; then
+    for KEY in $(cat "$FILE" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
+        installURL=$(cat "$FILE" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+        mkdir -p ~/jap/plugins/packages/
+        sh -c "$(curl -fsSL $installURL/update.sh)" -- ~/jap
+        echo "Installation for \"$KEY\" completed successfully."
+        echo ${BLUE}"#############################"${NC}
+    done
+    echo ${GREEN}"done with updates"${NC}
+    source /Users/$USER/jap/plugins/source.sh
+
+else
+    echo ${RED}"The script \"$FILE\" does not exist"${NC}
+fi
+}
+
+source /Users/$USER/jap/plugins/source.sh
