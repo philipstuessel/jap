@@ -8,7 +8,7 @@ When you install the zsh plugin, it introduces numerous useful aliases and adds 
 
 ## install:
 
-```shll
+```shell
 cd ~
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.sh)"
 ```
@@ -23,6 +23,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/i
 </br>
 
 ## help me:
-```shll
+```shell
 jap help
 ```
