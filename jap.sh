@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/jap
 
 # alias
 alias s="source ~/.zshrc"
@@ -12,6 +12,9 @@ alias nf="mkdir"
 alias cls="clear"
 alias home="cd ~"
 alias c="code ."
+alias py="python3"
+alias python="python3"
+alias pip="pip3"
 
 # cd 
 alias .4='cd ../../../../'
@@ -29,10 +32,10 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.4.2"
+VERSION="v0.4.3"
 
 jap() {
-    if [[ "$1" == "-v" || "$1" == "" || "$1" == "" ]]; then
+    if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
          echo "JAP 🍜"
          echo ${VERSION}
     fi
@@ -65,6 +68,8 @@ jap() {
         echo " o                   open ."
         echo " nf                  mkdir"
         echo " cls                 clear"
+        echo " py                  python3"
+        echo " pip                 pip3"
         echo " c                   code ."
         echo " home                cd ~"
         echo " ..4                 cd ../../../../"
