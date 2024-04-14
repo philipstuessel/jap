@@ -2,7 +2,8 @@
 source ~/.zshrc
 echo "install JAP 🍜"
 echo ${BLUE}">>>>>>>"${NC}
-fetch ~/jap ~/jap/jap.sh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh
+echo $(mkdir -p ~/jap && curl -o ~/jap/jap.sh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh)
+echo ${MAGENTA}"install: jap.sh"${NC}
 echo "was installed in: \n"${MAGENTA}$(pwd)${NC}
 echo "\nsource /Users/$(users)/jap/jap.sh" >> ~/.zshrc ""
 echo ${GREEN}"add in ~/.zshrc"${NC}
