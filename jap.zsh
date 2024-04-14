@@ -1,4 +1,4 @@
-#!/bin/jap
+#!/bin/zsh
 
 # alias
 alias s="source ~/.zshrc"
@@ -15,6 +15,7 @@ alias c="code ."
 alias py="python3"
 alias python="python3"
 alias pip="pip3"
+alias pwdc="copy pwd"
 
 # cd 
 alias .4='cd ../../../../'
@@ -32,12 +33,14 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.4.3"
+VERSION="v0.5.0"
+
+PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
          echo "JAP 🍜"
-         echo ${VERSION}
+         echo ${BOLD}${VERSION}${NC}
     fi
 
     if [[ "$1" == "help" ]]; then
@@ -51,8 +54,13 @@ jap() {
         echo " plugin update       update all Plugins"
         echo ""
         echo "------------- commands -------------"
-        echo " copy [file]         Copy files to clipboard"
+        echo " copy [file]         File contents to clipboard"
+        echo " copy"
+        echo "  ↳ pwd / p          Copy this path to the clipboard"
+        echo "  ↳ pwd / p [file]   Copy this file path to the clipboard"
+        echo ""
         echo " tpl [folder]        Paste the folder contents"
+        echo " tpl"
         echo "  ↳ tpl l            List all folder template"
         echo "  ↳ tpl o            Open the tpl folder"
         echo ""
@@ -77,7 +85,7 @@ jap() {
     fi
 
     if [[ "$1" == "update" ]]; then
-           sh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.sh)" -- ~/jap
+           zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.zsh)" -- ~/jap
     fi
 
     if [[ "$1" == "gi" ]]; then
@@ -100,8 +108,17 @@ jap() {
 }
 
 copy() {
-    pbcopy < "$1";
-    echo $1' was copied into the clipboard 📋'
+    if [[ "$1" == "pwd" || "$1" == "p" ]]; then
+        if [[ ! "$2" == "" ]]; then
+            echo "$(pwd)/$2" | pbcopy
+            echo ${BLUE}$(pwd)/"$2"${NC}; 
+        else
+            pwd | pbcopy && echo ${BLUE}$(pwd)${NC};  
+        fi
+    else
+        pbcopy < "$1" && 
+        echo $1' was copied into the clipboard 📋'
+    fi 
 }
 
 tpl() {
@@ -119,43 +136,47 @@ tpl() {
 }
 
 installPlugin() {
-         KEY="${1}"
-         FILE="/Users/$USER/jap/plugins/plugins.json"
-         if [ -f "$FILE" ]; then
-             if grep -q "\"${KEY}\"" "$FILE"; then
-                 installURL=$(cat "$FILE" | grep "\"${1}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-                 echo ${BOLD}"JAP 🍜 Plugins"${NC}
-                 echo ${BOLD}"the ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed"${NC}
-                 echo ${BOLD}"install server: $installURL"${NC}
-                 sh -c "$(curl -fsSL $installURL/install.sh)"
-                 echo "source /Users/$USER/jap/plugins/packages/$KEY.sh" >> /Users/$USER/jap/plugins/source.sh
-                 source /Users/$USER/jap/plugins/source.sh
-             else
-                 echo ${RED}"the plugin \"$KEY\" was not found"${NC}
-
-             fi
-         else
-             echo ${RED}"The script \"$FILE\" does not exist"${NC}
-         fi
+    KEY="${1}"
+    if curl -sSL "$PLUGIN_URL" | grep -q "\"${KEY}\""; then
+        installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+        echo "${BOLD}JAP 🍜 Plugins${NC}"
+        echo "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
+        echo "${BOLD}Install URL: $installURL${NC}"
+        zsh -c "$(curl -fsSL $installURL/install.zsh)"
+        echo "source /Users/$USER/jap/plugins/packages/$KEY.sh" >> /Users/$USER/jap/plugins/source.sh
+        source /Users/$USER/jap/plugins/source.sh
+    else
+        echo "${RED}The plugin \"$KEY\" was not found${NC}"
+    fi
 }
 
 updatePlugin() {
-FILE="/Users/$USER/jap/plugins/plugins.json"
-echo "JAP 🍜 Plugins Update"
-if [ -f "$FILE" ]; then
-    for KEY in $(cat "$FILE" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
-        installURL=$(cat "$FILE" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-        mkdir -p ~/jap/plugins/packages/
-        sh -c "$(curl -fsSL $installURL/update.sh)" -- ~/jap
-        echo "Installation for \"$KEY\" completed successfully."
-        echo ${BLUE}"#############################"${NC}
-    done
-    echo ${GREEN}"done with updates"${NC}
-    source /Users/$USER/jap/plugins/source.sh
+    echo "JAP 🍜 Plugins Update"
+    if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
+        for KEY in $(curl -sSL "$PLUGIN_URL" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
+            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+            mkdir -p ~/jap/plugins/packages/
+            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
+            echo "Installation for \"$KEY\" completed successfully."
+            echo ${BLUE}"#############################"${NC}
+        done
+        echo ${GREEN}"done with updates"${NC}
+        source /Users/$USER/jap/plugins/source.sh
+    else
+        echo ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
+    fi
+}
 
-else
-    echo ${RED}"The script \"$FILE\" does not exist"${NC}
-fi
+fetch() {
+    mkdir -p "$1"
+    curl -o "$2" "$3" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "📥 $3"
+        return 0
+    else
+        echo "❌ ${RED}$3${NC}"
+        return 1
+    fi
 }
 
 source /Users/$USER/jap/plugins/source.sh
