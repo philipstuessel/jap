@@ -2,7 +2,7 @@
 source ~/.zshrc
 echo ${CYAN}"Update JAP 🍜"${NC}
 echo ${BLUE}">>>>>>>"${NC}
-fetch ~/jap ~/jap/jap.sh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh
+fetch ~/jap ~/jap/jap.zsh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh
 echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
 echo $(mkdir -p ~/jap/plugins/) ${MAGENTA}"create: plugins folder"${NC}
 echo $(mkdir -p ~/jap/plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
