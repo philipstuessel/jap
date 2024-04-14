@@ -10,15 +10,15 @@ When you install the zsh plugin, it introduces numerous useful aliases and adds 
 
 ```shell
 cd ~
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"
+zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"
 ```
 </br>
 
 | Method    | Command                                                                                           |
 | :-------- | :------------------------------------------------------------------------------------------------ |
-| **curl**  | `sh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"` |
-| **wget**  | `sh -c "$(wget -O- https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"`   |
-| **fetch** | `sh -c "$(fetch -o -https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"` |
+| **curl**  | `zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"` |
+| **wget**  | `zsh -c "$(wget -O- https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"`   |
+| **fetch** | `zsh -c "$(fetch -o -https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"` |
 </br>
 </br>
 
