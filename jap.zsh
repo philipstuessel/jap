@@ -33,7 +33,7 @@ BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
-VERSION="v0.5.0"
+VERSION="v0.5.1"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -143,7 +143,7 @@ installPlugin() {
         echo "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
         echo "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
-        echo "source /Users/$USER/jap/plugins/packages/$KEY.sh" >> /Users/$USER/jap/plugins/source.sh
+        echo "source /Users/$USER/jap/plugins/packages/$KEY.zsh" >> /Users/$USER/jap/plugins/source.sh
         source /Users/$USER/jap/plugins/source.sh
     else
         echo "${RED}The plugin \"$KEY\" was not found${NC}"
