@@ -1,4 +1,5 @@
 {
     "gitpilot": "raw.githubusercontent.com/philipstuessel/gitpilot/main/",
-    "webgrab": "raw.githubusercontent.com/philipstuessel/web-grab/main/"
+    "webgrab": "raw.githubusercontent.com/philipstuessel/web-grab/main/",
+    "opm": "raw.githubusercontent.com/philipstuessel/open-package-manager/main"
 }
