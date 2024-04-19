@@ -24,9 +24,11 @@ echo ${MAGENTA}"install: jap.zsh"${NC}
 echo "was installed in: \n"${MAGENTA}$(pwd)${NC}
 echo "\nsource /Users/$(users)/jap/jap.zsh" >> ~/.zshrc ""
 echo ${GREEN}"add in ~/.zshrc"${NC}
+echo $(mkdir -p ~/jap/config/.jap) ${MAGENTA}"create: .jap folder"${NC}
 echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
-echo $(mkdir -p ~/jap/plugins/) ${MAGENTA}"create: plugins folder"${NC}
 echo $(mkdir -p ~/jap/plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
+touch "/Users/$USER/jap/config/.jap/plugins.json"
+echo '{}' > /Users/$USER/jap/config/.jap/plugins.json
 echo "" > /Users/$USER/jap/plugins/source.sh
 echo "command jap"
 source ~/.zshrc

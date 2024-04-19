@@ -43,7 +43,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.5.2"
+VERSION="v0.5.3"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -121,6 +121,18 @@ jap() {
     if [[ "$1" == "colors" ]]; then
         color
     fi
+
+    if [[ "$1" == "r" || "$1" == "remove" ]];then
+        jap_plugins "r" "$2"
+    fi
+
+    if [[ "$1" == "l" || "$1" == "list" ]];then
+    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
+    echo "List of JAP plugins"
+    echo "-------------------"
+    printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
+    echo "-------------------"
+    fi
 }
 
 copy() {
@@ -182,6 +194,7 @@ installPlugin() {
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
         echo "source /Users/$USER/jap/plugins/packages/$KEY.zsh" >> /Users/$USER/jap/plugins/source.sh
         source /Users/$USER/jap/plugins/source.sh
+        jap_plugins "add" $KEY "$KEY.zsh"
     else
         echo "${RED}The plugin \"$KEY\" was not found${NC}"
     fi
@@ -234,6 +247,35 @@ jap_config() {
     url="$2"
     folder="/Users/$USER/jap/config/$name/"
     fetch2 $folder $url
+}
+
+jap_plugins() {
+    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
+    if [[ "$1" == "add" ]];then
+        jq --arg key "$2" --arg val "$3" '. += { ($key): $val }' $plugins_file > temp && mv temp $plugins_file
+    fi
+    if [[ "$1" == "r" ]]; then
+            file=$(jq ".$2" $plugins_file | tr -d '"')
+            if [[ ! $file == null ]]; then
+                echo "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
+                file_source="${JAP_FOLDER}plugins/source.sh"
+                value_source="${JAP_FOLDER}plugins/packages/${file}"
+                echo "---------------------------------------------------------"
+                grep -v "source $value_source" $file_source > temp && mv temp $file_source
+                echo "🗑️  Plugins have been removed from source.sh"
+                echo "---------------------------------------------------------"
+                rm $value_source
+                echo "🗑️  $value_source have been removed from 'packages'"
+                echo "---------------------------------------------------------"
+                jq --arg key "$2" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
+                echo "🗑️  $2 have benn removed from plugins.json"
+                echo "---------------------------------------------------------"
+                echo "${BGREEN}the plugin '$2' has been deleted${NC}"
+            else
+                echo "${RED}Is not in plugins.json${NC}"
+                echo "${RED}Error in: $plugins_file${NC}"
+            fi
+    fi
 }
 
 source /Users/$USER/jap/plugins/source.sh
