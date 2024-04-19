@@ -12,6 +12,11 @@ UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
 
 source ~/.zshrc
+if command -v jq &> /dev/null; then
+    echo ""
+else
+    brew install jq
+fi
 echo "install JAP 🍜"
 echo ${BLUE}">>>>>>>"${NC}
 echo $(mkdir -p ~/jap && curl -o ~/jap/jap.zsh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh)

@@ -7,6 +7,7 @@ alias t="touch"
 alias apr="apachectl restart"
 alias apstop="apachectl stop"
 alias aps="apachectl start"
+alias l="ls -lah"
 alias o="open ."
 alias nf="mkdir"
 alias cls="clear"
@@ -31,11 +32,22 @@ CYAN='\033[0;36m'
 WHITE='\033[0;37m'
 BOLD='\033[1m'
 UNDERLINE='\033[4m'
+
+BRED='\e[0;41m'
+BGREEN='\e[0;42m'
+BYELLOW='\e[0;43m'
+BBLUE='\e[0;44m'
+BMAGENTA='\e[0;45m'
+BCYAN='\e[0;46m'
+BWHITE='\e[0;47m'
+
 NC='\033[0m' # No Color
 
-VERSION="v0.5.1"
+VERSION="v0.5.2"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
+
+JAP_FOLDER="/Users/$USER/jap/"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
@@ -103,7 +115,11 @@ jap() {
     fi
 
     if [[ "$1" == "pu" || "$1" == "plugins update" ]]; then
-        updatePlugin;
+        updatePlugin
+    fi
+
+    if [[ "$1" == "colors" ]]; then
+        color
     fi
 }
 
@@ -119,6 +135,27 @@ copy() {
         pbcopy < "$1" && 
         echo $1' was copied into the clipboard 📋'
     fi 
+}
+
+color() {
+     echo "----------- Colors"
+     echo ${RED}"- RED"${NC}
+     echo ${GREEN}"- GREEN"${NC}
+     echo ${YELLOW}"- YELLOW"${NC}
+     echo ${BLUE}"- BLUE"${NC}
+     echo ${MAGENTA}"- MAGENTA"${NC}
+     echo ${CYAN}"- CYAN"${NC}
+     echo ${BOLD}"- BOLD"${NC}
+     echo ${UNDERLINE}"- UNDERLINE"${NC}
+     echo "----------- Backgrounds"
+     echo ${BRED}"- BRED"${NC}
+     echo ${BGREEN}"- BGREEN"${NC}
+     echo ${BYELLOW}"- BYELLOW"${NC}
+     echo ${BBLUE}"- BBLUE"${NC}
+     echo ${BMAGENTA}"- BMAGENTA"${NC}
+     echo ${BCYAN}"- BCYAN"${NC}
+     echo ${BWHITE}"- BCYAN"${NC}
+     echo "end with NC"
 }
 
 tpl() {
@@ -172,11 +209,31 @@ fetch() {
     curl -o "$2" "$3" >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "📥 $3"
-        return 0
+        return 1
     else
         echo "❌ ${RED}$3${NC}"
-        return 1
+        return 0
     fi
+}
+
+fetch2() {
+    mkdir -p "$1"
+    file="$1/$(basename "$2")"
+    curl -o "$file" "$2" >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "📥 $2"
+        return 1
+    else
+        echo "❌ ${RED}$2${NC}"
+        return 0
+    fi
+}
+
+jap_config() {
+    name="$1"
+    url="$2"
+    folder="/Users/$USER/jap/config/$name/"
+    fetch2 $folder $url
 }
 
 source /Users/$USER/jap/plugins/source.sh
