@@ -43,7 +43,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.5.3"
+VERSION="v0.5.4"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -192,7 +192,7 @@ installPlugin() {
         echo "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
         echo "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
-        echo "source /Users/$USER/jap/plugins/packages/$KEY.zsh" >> /Users/$USER/jap/plugins/source.sh
+        echo "source /Users/$USER/jap/plugins/packages/$KEY/$KEY.zsh" >> /Users/$USER/jap/plugins/source.sh
         source /Users/$USER/jap/plugins/source.sh
         jap_plugins "add" $KEY "$KEY.zsh"
     else
@@ -205,7 +205,7 @@ updatePlugin() {
     if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
         for KEY in $(curl -sSL "$PLUGIN_URL" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
             installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            mkdir -p ~/jap/plugins/packages/
+            mkdir -p ~/jap/plugins/packages/$KEY/
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
             echo "Installation for \"$KEY\" completed successfully."
             echo ${BLUE}"#############################"${NC}
@@ -242,32 +242,26 @@ fetch2() {
     fi
 }
 
-jap_config() {
-    name="$1"
-    url="$2"
-    folder="/Users/$USER/jap/config/$name/"
-    fetch2 $folder $url
-}
-
 jap_plugins() {
     plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
     if [[ "$1" == "add" ]];then
         jq --arg key "$2" --arg val "$3" '. += { ($key): $val }' $plugins_file > temp && mv temp $plugins_file
     fi
     if [[ "$1" == "r" ]]; then
+            pname="$2"
             file=$(jq ".$2" $plugins_file | tr -d '"')
             if [[ ! $file == null ]]; then
                 echo "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
                 file_source="${JAP_FOLDER}plugins/source.sh"
-                value_source="${JAP_FOLDER}plugins/packages/${file}"
+                value_source="${JAP_FOLDER}plugins/packages/${pname}/${file}"
                 echo "---------------------------------------------------------"
                 grep -v "source $value_source" $file_source > temp && mv temp $file_source
                 echo "🗑️  Plugins have been removed from source.sh"
                 echo "---------------------------------------------------------"
-                rm $value_source
+                rm -r "${JAP_FOLDER}plugins/packages/${pname}/"
                 echo "🗑️  $value_source have been removed from 'packages'"
                 echo "---------------------------------------------------------"
-                jq --arg key "$2" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
+                jq --arg key "$pname" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
                 echo "🗑️  $2 have benn removed from plugins.json"
                 echo "---------------------------------------------------------"
                 echo "${BGREEN}the plugin '$2' has been deleted${NC}"
