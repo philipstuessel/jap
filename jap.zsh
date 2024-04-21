@@ -43,16 +43,16 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.5.4"
+VERSION="v0.5.5"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
-JAP_FOLDER="/Users/$USER/jap/"
+JAP_FOLDER="$HOME/jap/"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
          echo "JAP 🍜"
-         echo ${BOLD}${VERSION}${NC}
+         echo -e ${BOLD}${VERSION}${NC}
     fi
 
     if [[ "$1" == "help" ]]; then
@@ -101,13 +101,13 @@ jap() {
     fi
 
     if [[ "$1" == "gi" ]]; then
-        if [ ! -f /Users/$USER/jap/.gitignore ]; then
-        echo "Create in /Users/$USER/jap/${GREEN}".gitignore"${NC}"
-        echo ".DS_Store" > /Users/$USER/jap/.gitignore
-        echo "**/.DS_Store" >> /Users/$USER/jap/.gitignore
+        if [ ! -f $HOME/jap/.gitignore ]; then
+        echo -e "Create in $HOME/jap/${GREEN}".gitignore"${NC}"
+        echo ".DS_Store" > $HOME/jap/.gitignore
+        echo "**/.DS_Store" >> $HOME/jap/.gitignore
         fi
-        cp /Users/$USER/jap/.gitignore $(pwd)/
-        echo $(pwd)"/"${GREEN}".gitignore"${NC}
+        cp $HOME/jap/.gitignore $(pwd)/
+        echo -e $(pwd)"/"${GREEN}".gitignore"${NC}
     fi
 
     if [[ "$1" == "i" || "$1" == "install" ]]; then
@@ -139,7 +139,7 @@ copy() {
     if [[ "$1" == "pwd" || "$1" == "p" ]]; then
         if [[ ! "$2" == "" ]]; then
             echo "$(pwd)/$2" | pbcopy
-            echo ${BLUE}$(pwd)/"$2"${NC}; 
+            echo -e ${BLUE}$(pwd)/"$2"${NC}; 
         else
             pwd | pbcopy && echo ${BLUE}$(pwd)${NC};  
         fi
@@ -151,22 +151,22 @@ copy() {
 
 color() {
      echo "----------- Colors"
-     echo ${RED}"- RED"${NC}
-     echo ${GREEN}"- GREEN"${NC}
-     echo ${YELLOW}"- YELLOW"${NC}
-     echo ${BLUE}"- BLUE"${NC}
-     echo ${MAGENTA}"- MAGENTA"${NC}
-     echo ${CYAN}"- CYAN"${NC}
-     echo ${BOLD}"- BOLD"${NC}
-     echo ${UNDERLINE}"- UNDERLINE"${NC}
+     echo -e "${RED}- RED${NC}"
+     echo -e ${GREEN}"- GREEN"${NC}
+     echo -e ${YELLOW}"- YELLOW"${NC}
+     echo -e ${BLUE}"- BLUE"${NC}
+     echo -e ${MAGENTA}"- MAGENTA"${NC}
+     echo -e ${CYAN}"- CYAN"${NC}
+     echo -e ${BOLD}"- BOLD"${NC}
+     echo -e ${UNDERLINE}"- UNDERLINE"${NC}
      echo "----------- Backgrounds"
-     echo ${BRED}"- BRED"${NC}
-     echo ${BGREEN}"- BGREEN"${NC}
-     echo ${BYELLOW}"- BYELLOW"${NC}
-     echo ${BBLUE}"- BBLUE"${NC}
-     echo ${BMAGENTA}"- BMAGENTA"${NC}
-     echo ${BCYAN}"- BCYAN"${NC}
-     echo ${BWHITE}"- BCYAN"${NC}
+     echo -e ${BRED}"- BRED"${NC}
+     echo -e ${BGREEN}"- BGREEN"${NC}
+     echo -e ${BYELLOW}"- BYELLOW"${NC}
+     echo -e ${BBLUE}"- BBLUE"${NC}
+     echo -e ${BMAGENTA}"- BMAGENTA"${NC}
+     echo -e ${BCYAN}"- BCYAN"${NC}
+     echo -e ${BWHITE}"- BCYAN"${NC}
      echo "end with NC"
 }
 
@@ -175,11 +175,11 @@ tpl() {
     open ~/jap/tpl/
     else
     if [[ "$1" == "l" ]]; then
-    echo ${UNDERLINE}"---- list all templates ----"${NC}
-    find /Users/$USER/jap/tpl/* -maxdepth 0 -type d -exec basename {} \; | while read dir; do echo -e "\033[0;36m$dir\033[0m"; done
+    echo -e ${UNDERLINE}"---- list all templates ----"${NC}
+    find $HOME/jap/tpl/* -maxdepth 0 -type d -exec basename {} \; | while read dir; do echo -e "\033[0;36m$dir\033[0m"; done
     else 
         cp -r ~/jap/tpl/$1/* ./
-        echo "The template ${GREEN}$1${NC} was added"
+        echo -e "The template ${GREEN}$1${NC} was added"
     fi
     fi
 }
@@ -188,15 +188,15 @@ installPlugin() {
     KEY="${1}"
     if curl -sSL "$PLUGIN_URL" | grep -q "\"${KEY}\""; then
         installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-        echo "${BOLD}JAP 🍜 Plugins${NC}"
-        echo "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
-        echo "${BOLD}Install URL: $installURL${NC}"
+        echo -e "${BOLD}JAP 🍜 Plugins${NC}"
+        echo -e "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
+        echo -e "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
-        echo "source /Users/$USER/jap/plugins/packages/$KEY/$KEY.zsh" >> /Users/$USER/jap/plugins/source.sh
-        source /Users/$USER/jap/plugins/source.sh
+        echo "source $HOME/jap/plugins/packages/$KEY/$KEY.zsh" >> $HOME/jap/plugins/source.sh
+        source $HOME/jap/plugins/source.sh
         jap_plugins "add" $KEY "$KEY.zsh"
     else
-        echo "${RED}The plugin \"$KEY\" was not found${NC}"
+        echo -e "${RED}The plugin \"$KEY\" was not found${NC}"
     fi
 }
 
@@ -210,10 +210,10 @@ updatePlugin() {
             echo "Installation for \"$KEY\" completed successfully."
             echo ${BLUE}"#############################"${NC}
         done
-        echo ${GREEN}"done with updates"${NC}
-        source /Users/$USER/jap/plugins/source.sh
+        echo -e ${GREEN}"done with updates"${NC}
+        source $HOME/jap/plugins/source.sh
     else
-        echo ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
+        echo -e ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
     fi
 }
 
@@ -224,7 +224,7 @@ fetch() {
         echo "📥 $3"
         return 1
     else
-        echo "❌ ${RED}$3${NC}"
+        echo -e "❌ ${RED}$3${NC}"
         return 0
     fi
 }
@@ -237,7 +237,7 @@ fetch2() {
         echo "📥 $2"
         return 1
     else
-        echo "❌ ${RED}$2${NC}"
+        echo -e "❌ ${RED}$2${NC}"
         return 0
     fi
 }
@@ -251,7 +251,7 @@ jap_plugins() {
             pname="$2"
             file=$(jq ".$2" $plugins_file | tr -d '"')
             if [[ ! $file == null ]]; then
-                echo "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
+                echo -e "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
                 file_source="${JAP_FOLDER}plugins/source.sh"
                 value_source="${JAP_FOLDER}plugins/packages/${pname}/${file}"
                 echo "---------------------------------------------------------"
@@ -262,14 +262,14 @@ jap_plugins() {
                 echo "🗑️  $value_source have been removed from 'packages'"
                 echo "---------------------------------------------------------"
                 jq --arg key "$pname" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
-                echo "🗑️  $2 have benn removed from plugins.json"
+                echo "🗑️  $2 have been removed from plugins.json"
                 echo "---------------------------------------------------------"
-                echo "${BGREEN}the plugin '$2' has been deleted${NC}"
+                echo -e "${BGREEN}the plugin '$2' has been deleted${NC}"
             else
-                echo "${RED}Is not in plugins.json${NC}"
-                echo "${RED}Error in: $plugins_file${NC}"
+                echo -e "${RED}Is not in plugins.json${NC}"
+                echo -e "${RED}Error in: $plugins_file${NC}"
             fi
     fi
 }
 
-source /Users/$USER/jap/plugins/source.sh
+source $HOME/jap/plugins/source.sh
