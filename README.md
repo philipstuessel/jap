@@ -9,8 +9,7 @@ When you install the zsh plugin, it introduces numerous useful aliases and adds 
 ## install:
 
 ```shell
-cd ~
-zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"
+cd ~ && zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philip-stuessel/jap/main/install.zsh)"
 ```
 </br>
 

@@ -3,7 +3,6 @@
 # alias
 alias s="source ~/.zshrc"
 alias q="killall Terminal"
-alias t="touch"
 alias apr="apachectl restart"
 alias apstop="apachectl stop"
 alias aps="apachectl start"
@@ -17,10 +16,6 @@ alias py="python3"
 alias python="python3"
 alias pip="pip3"
 alias pwdc="copy pwd"
-
-# cd 
-alias .4='cd ../../../../'
-alias .5='cd ../../../../..'
 
 #color
 RED='\033[0;31m'
@@ -43,11 +38,13 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.5.5"
+VERSION="v0.6.0"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
 JAP_FOLDER="$HOME/jap/"
+
+source $HOME/jap/plugins/source.sh
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
@@ -58,12 +55,13 @@ jap() {
     if [[ "$1" == "help" ]]; then
         echo "Usage: jap [options]"
         echo "Options:"
-        echo " -v                  Version"
-        echo " help                List the commamds"
-        echo " gi                  Create the .gitignore file"
-        echo " update              Update JAP"
+        echo " -v                  version"
+        echo " help                list the commamds"
+        echo " gi                  create the .gitignore file"
+        echo " update              update JAP"
         echo " install [plugin]    install the Plugin"
-        echo " plugin update       update all Plugins"
+        echo " upgrade             upgrade all Plugins"
+        echo "  ↳ [plugin name]    upgrade only this Plugin"
         echo ""
         echo "------------- commands -------------"
         echo " copy [file]         File contents to clipboard"
@@ -75,6 +73,8 @@ jap() {
         echo " tpl"
         echo "  ↳ tpl l            List all folder template"
         echo "  ↳ tpl o            Open the tpl folder"
+        echo ""
+        echo " ziper [zip file]    unzip and pack ZIP or with url-zip"
         echo ""
         echo "--------- workflow (alias) ---------"
         echo " alias               commands"
@@ -92,7 +92,6 @@ jap() {
         echo " pip                 pip3"
         echo " c                   code ."
         echo " home                cd ~"
-        echo " ..4                 cd ../../../../"
         echo ""
     fi
 
@@ -114,8 +113,8 @@ jap() {
         installPlugin "$2"
     fi
 
-    if [[ "$1" == "pu" || "$1" == "plugins update" ]]; then
-        updatePlugin
+    if [[ "$1" == "ug" || "$1" == "upgrade" ]]; then
+        updatePlugin "$2"
     fi
 
     if [[ "$1" == "colors" ]]; then
@@ -128,7 +127,7 @@ jap() {
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
     plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    echo "List of JAP plugins"
+    echo "List of installed JAP plugins"
     echo "-------------------"
     printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
     echo "-------------------"
@@ -147,6 +146,40 @@ copy() {
         pbcopy < "$1" && 
         echo $1' was copied into the clipboard 📋'
     fi 
+}
+
+t() {
+    folder="$(dirname "$1")"
+    mkdir -p "$(pwd)/$folder"
+    touch "$1"
+}
+
+ziper() {
+    select="$1"
+    folder="$2"
+    name="$(basename "$1")"
+    filename="${name%.*}"
+    if [[ $folder == "" ]];then
+        folder="$(pwd)"
+    fi
+
+    if file -b "$select" | grep -q 'Zip archive'; then
+          if [[ ! $folder == "" ]];then
+            unzip $select -d $folder
+            return 0;
+          fi
+          unzip $select
+          return 0
+    fi
+
+    if [ -d $select ]; then
+        zip -r $select $folder
+    else
+    if [[ ! -d $folder ]];then
+        mkdir $folder
+    fi
+        zip $filename".zip" $select $folder
+    fi
 }
 
 color() {
@@ -201,17 +234,32 @@ installPlugin() {
 }
 
 updatePlugin() {
-    echo "JAP 🍜 Plugins Update"
     if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
+        if [[ "$1" == "" ]];then
+        echo "JAP 🍜 Upgrade Plugins"
         for KEY in $(curl -sSL "$PLUGIN_URL" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
             installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             mkdir -p ~/jap/plugins/packages/$KEY/
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo "Installation for \"$KEY\" completed successfully."
+            echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
             echo ${BLUE}"#############################"${NC}
         done
         echo -e ${GREEN}"done with updates"${NC}
         source $HOME/jap/plugins/source.sh
+        else
+            KEY="$1"
+            echo "JAP 🍜 Upgrade '${KEY}'"
+            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+            if [ -z "$installURL" ]; then
+                echo "${RED}no plugins with the name '${KEY}' found${NC}"
+                return 0
+            fi
+            mkdir -p ~/jap/plugins/packages/$KEY/
+            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
+            echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
+            echo -e ${GREEN}"${BOLD}${KEY}${NC}${GREEN} has been updated"${NC}
+            source $HOME/jap/plugins/source.sh
+        fi
     else
         echo -e ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
     fi
@@ -271,5 +319,3 @@ jap_plugins() {
             fi
     fi
 }
-
-source $HOME/jap/plugins/source.sh
