@@ -2,5 +2,6 @@
     "gitpilot": "raw.githubusercontent.com/philipstuessel/gitpilot/main/",
     "webgrab": "raw.githubusercontent.com/philipstuessel/web-grab/main/",
     "opm": "raw.githubusercontent.com/philipstuessel/open-package-manager/main",
-    "sshm": "raw.githubusercontent.com/philipstuessel/sshm/main"
+    "sshm": "raw.githubusercontent.com/philipstuessel/sshm/main",
+    "japache" : "raw.githubusercontent.com/philipstuessel/japache/main"
 }

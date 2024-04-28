@@ -3,12 +3,8 @@
 # alias
 alias s="source ~/.zshrc"
 alias q="killall Terminal"
-alias apr="apachectl restart"
-alias apstop="apachectl stop"
-alias aps="apachectl start"
 alias l="ls -lah"
 alias o="open ."
-alias nf="mkdir"
 alias cls="clear"
 alias home="cd ~"
 alias c="code ."
@@ -16,6 +12,9 @@ alias py="python3"
 alias python="python3"
 alias pip="pip3"
 alias pwdc="copy pwd"
+alias install="sudo apt install"
+alias update="sudo apt update"
+alias md="mkdir"
 
 #color
 RED='\033[0;31m'
@@ -38,7 +37,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.6.0"
+VERSION="v0.6.1"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
