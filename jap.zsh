@@ -37,7 +37,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.6.1"
+VERSION="v0.6.2"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -233,27 +233,31 @@ installPlugin() {
 }
 
 updatePlugin() {
+    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
     if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
         if [[ "$1" == "" ]];then
         echo "JAP 🍜 Upgrade Plugins"
-        for KEY in $(curl -sSL "$PLUGIN_URL" | sed -n 's/.*"\([^"]*\)".*/\1/p'); do
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            mkdir -p ~/jap/plugins/packages/$KEY/
+        keys=$(jq -r 'keys[]' $plugins_file)
+        while IFS= read -r key; do
+            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${key}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
             echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
             echo ${BLUE}"#############################"${NC}
-        done
+        done <<< "$keys"
         echo -e ${GREEN}"done with updates"${NC}
         source $HOME/jap/plugins/source.sh
         else
             KEY="$1"
+            if ! jq -e --arg key "$KEY" 'has($key)' $plugins_file >/dev/null; then
+                echo "${RED}No plugins with the name '${KEY}' found${NC}"
+                return 0
+            fi
             echo "JAP 🍜 Upgrade '${KEY}'"
             installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             if [ -z "$installURL" ]; then
-                echo "${RED}no plugins with the name '${KEY}' found${NC}"
+                echo "${RED}Install error (${installURL})${NC}"
                 return 0
             fi
-            mkdir -p ~/jap/plugins/packages/$KEY/
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
             echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
             echo -e ${GREEN}"${BOLD}${KEY}${NC}${GREEN} has been updated"${NC}
