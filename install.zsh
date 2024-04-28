@@ -10,6 +10,7 @@ WHITE='\033[0;37m'
 BOLD='\033[1m'
 UNDERLINE='\033[4m'
 NC='\033[0m' # No Color
+JAP_FOLDER="$HOME/jap/"
 
 source ~/.zshrc
 if command -v jq &> /dev/null; then
@@ -19,17 +20,17 @@ else
 fi
 echo "install JAP 🍜"
 echo ${BLUE}">>>>>>>"${NC}
-echo $(mkdir -p ~/jap && curl -o ~/jap/jap.zsh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh)
+echo $(mkdir -p ${JAP_FOLDER} && curl -o ${JAP_FOLDER}jap.zsh https://raw.githubusercontent.com/philipstuessel/jap/main/jap.zsh)
 echo ${MAGENTA}"install: jap.zsh"${NC}
 echo "was installed in: \n"${MAGENTA}$(pwd)${NC}
-echo "\nsource /Users/$(users)/jap/jap.zsh" >> ~/.zshrc ""
+echo "\nsource ${JAP_FOLDER}jap.zsh" >> ~/.zshrc ""
 echo ${GREEN}"add in ~/.zshrc"${NC}
-echo $(mkdir -p ~/jap/config/.jap) ${MAGENTA}"create: .jap folder"${NC}
-echo $(mkdir -p ~/jap/tpl/) ${MAGENTA}"create: tpl folder"${NC}
-echo $(mkdir -p ~/jap/plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
-touch "/Users/$USER/jap/config/.jap/plugins.json"
-echo '{}' > /Users/$USER/jap/config/.jap/plugins.json
-echo "" > /Users/$USER/jap/plugins/source.sh
+echo $(mkdir -p ${JAP_FOLDER}config/.jap) ${MAGENTA}"create: .jap folder"${NC}
+echo $(mkdir -p ${JAP_FOLDER}tpl/) ${MAGENTA}"create: tpl folder"${NC}
+echo $(mkdir -p ${JAP_FOLDER}plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
+touch "$HOME/jap/config/.jap/plugins.json"
+echo '{}' > $HOME/jap/config/.jap/plugins.json
+echo "" > $HOME/jap/plugins/source.sh
 echo "command jap"
 source ~/.zshrc
 echo ${GREEN}"Done"${NC}
