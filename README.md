@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://i.ibb.co/gDP5fb3/jap-logo-min.png" width="25%" />
+<img src="http://japzsh.com/plugin/68747470733a2f2f692e6962622e636f2f674450356662332f6a61702d6c6f676f2d6d696e2e706e67.png" width="25%" />
 </p>
 
 When you install the zsh plugin, it introduces numerous useful aliases and adds new commands to your system. To explore all these commands, simply use `jap help`.
