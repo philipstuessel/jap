@@ -37,7 +37,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.6.2"
+VERSION="v0.6.3"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -241,25 +241,25 @@ updatePlugin() {
         while IFS= read -r key; do
             installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${key}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
-            echo ${BLUE}"#############################"${NC}
+            echo -e "Upgrade for '${BOLD}${key}${NC}' completed successfully."
+            echo -e ${BLUE}"#############################"${NC}
         done <<< "$keys"
         echo -e ${GREEN}"done with updates"${NC}
         source $HOME/jap/plugins/source.sh
         else
             KEY="$1"
             if ! jq -e --arg key "$KEY" 'has($key)' $plugins_file >/dev/null; then
-                echo "${RED}No plugins with the name '${KEY}' found${NC}"
+                echo -e "${RED}No plugins with the name '${KEY}' found${NC}"
                 return 0
             fi
             echo "JAP 🍜 Upgrade '${KEY}'"
             installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             if [ -z "$installURL" ]; then
-                echo "${RED}Install error (${installURL})${NC}"
+                echo -e "${RED}Install error (${installURL})${NC}"
                 return 0
             fi
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
+            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
             echo -e ${GREEN}"${BOLD}${KEY}${NC}${GREEN} has been updated"${NC}
             source $HOME/jap/plugins/source.sh
         fi
