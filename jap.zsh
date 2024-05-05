@@ -45,7 +45,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.7.0"
+VERSION="v0.7.1"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -175,18 +175,18 @@ copy() {
     if [[ "$1" == "pwd" || "$1" == "p" ]]; then
         if [[ ! "$2" == "" ]]; then
             copy_to_clipboard "$(pwd)/$2"
-            if [[ $? == null ]]; then
+            if [[ ! $? == null ]]; then
                 echo -e ${BLUE}$(pwd)/"$2"${NC}; 
             fi
         else
             copy_to_clipboard "$(pwd)"
-            if [[ $? == null ]]; then
+            if [[ ! $? == null ]]; then
                 echo -e ${BLUE}$(pwd)${NC}
             fi
         fi
     else
         copy_to_clipboard "$(cat "$1")"
-         if [[ $? == null ]]; then
+         if [[ ! $? == null ]]; then
             echo $1' was copied into the clipboard 📋'
         fi
     fi 
