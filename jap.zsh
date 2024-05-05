@@ -1,7 +1,7 @@
 #!/bin/zsh
-
 # alias
 alias s="source ~/.zshrc"
+alias sb="source ~/.bashrc"
 alias q="killall Terminal"
 alias l="ls -lah"
 alias o="open ."
@@ -15,6 +15,14 @@ alias pwdc="copy pwd"
 alias install="sudo apt install"
 alias update="sudo apt update"
 alias md="mkdir"
+alias pyv="py --version"
+alias rd="cd /"
+
+alias .="cd ."
+alias ..="cd .."
+alias ...="cd ..."
+alias .4="cd ...."
+alias .5="cd ....."
 
 #color
 RED='\033[0;31m'
@@ -37,7 +45,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.6.3"
+VERSION="v0.7.0"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -57,6 +65,9 @@ jap() {
         echo " -v                  version"
         echo " help                list the commamds"
         echo " gi                  create the .gitignore file"
+        echo " ip                  "
+        echo "  ↳ [url]            give ip from this domain"
+        echo "  ↳  my              give my ip"
         echo " update              update JAP"
         echo " install [plugin]    install the Plugin"
         echo " upgrade             upgrade all Plugins"
@@ -78,19 +89,23 @@ jap() {
         echo "--------- workflow (alias) ---------"
         echo " alias               commands"
         echo ""
-        echo " s                   source ~/.zshrc"
+        echo " ..                  cd .."
         echo " q                   killall Terminal"
         echo " t                   touch"
-        echo " apr                 apachectl restart"
-        echo " aps                 apachectl start"
-        echo " apstop              apachectl stop"
         echo " o                   open ."
-        echo " nf                  mkdir"
-        echo " cls                 clear"
-        echo " py                  python3"
-        echo " pip                 pip3"
         echo " c                   code ."
+        echo " l                   ls -lah"
+        echo " s                   source ~/.zshrc"
+        echo " sb                  source ~/.bashrc"
+        echo " py                  python3"
+        echo " rd                  cd /"
+        echo " md                  mkdir"
+        echo " cls                 clear"
+        echo " pyv                 python3 --version"
+        echo " pip                 pip3"
         echo " home                cd ~"
+        echo " update              sudo apt update"
+        echo " install             sudo apt install"
         echo ""
     fi
 
@@ -120,7 +135,7 @@ jap() {
         color
     fi
 
-    if [[ "$1" == "r" || "$1" == "remove" ]];then
+    if [[ "$1" == "r" || "$1" == "remove" || "$1" == "uninstall" ]];then
         jap_plugins "r" "$2"
     fi
 
@@ -131,26 +146,62 @@ jap() {
     printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
     echo "-------------------"
     fi
+
+    if [[ "$1" == "ip" ]];then
+        jip "$2" "$3"
+    fi
+}
+
+copy_to_clipboard() {
+    local os=$(uname)
+    local clipboard_content="$1"
+    if [ "$os" = "Darwin" ]; then
+        echo "$clipboard_content" | pbcopy
+    elif [ "$os" = "Linux" ]; then
+        if command -v xclip &> /dev/null
+        then
+            echo "$clipboard_content" | xclip -selection clipboard
+            return 1
+        else
+            echo -e "${RED}install xclip | sudo apt-get install xclip${NC}"
+            return 0;
+        fi
+    else
+        echo "Unsupported OS"
+    fi
 }
 
 copy() {
     if [[ "$1" == "pwd" || "$1" == "p" ]]; then
         if [[ ! "$2" == "" ]]; then
-            echo "$(pwd)/$2" | pbcopy
-            echo -e ${BLUE}$(pwd)/"$2"${NC}; 
+            copy_to_clipboard "$(pwd)/$2"
+            if [[ $? == null ]]; then
+                echo -e ${BLUE}$(pwd)/"$2"${NC}; 
+            fi
         else
-            pwd | pbcopy && echo ${BLUE}$(pwd)${NC};  
+            copy_to_clipboard "$(pwd)"
+            if [[ $? == null ]]; then
+                echo -e ${BLUE}$(pwd)${NC}
+            fi
         fi
     else
-        pbcopy < "$1" && 
-        echo $1' was copied into the clipboard 📋'
+        copy_to_clipboard "$(cat "$1")"
+         if [[ $? == null ]]; then
+            echo $1' was copied into the clipboard 📋'
+        fi
     fi 
 }
 
 t() {
     folder="$(dirname "$1")"
-    mkdir -p "$(pwd)/$folder"
-    touch "$1"
+    start="${folder:0:1}"
+    if [[ $start == "/" ]];then
+        mkdir -p "$folder"
+        touch "$1"
+    else    
+        mkdir -p "$(pwd)/$folder"
+        touch "$1"
+    fi
 }
 
 ziper() {
@@ -183,7 +234,7 @@ ziper() {
 
 color() {
      echo "----------- Colors"
-     echo -e "${RED}- RED${NC}"
+     echo -e ${RED}- RED${NC}
      echo -e ${GREEN}"- GREEN"${NC}
      echo -e ${YELLOW}"- YELLOW"${NC}
      echo -e ${BLUE}"- BLUE"${NC}
@@ -198,7 +249,7 @@ color() {
      echo -e ${BBLUE}"- BBLUE"${NC}
      echo -e ${BMAGENTA}"- BMAGENTA"${NC}
      echo -e ${BCYAN}"- BCYAN"${NC}
-     echo -e ${BWHITE}"- BCYAN"${NC}
+     echo -e ${BWHITE}"- WHITE"${NC}
      echo "end with NC"
 }
 
@@ -238,10 +289,10 @@ updatePlugin() {
         if [[ "$1" == "" ]];then
         echo "JAP 🍜 Upgrade Plugins"
         keys=$(jq -r 'keys[]' $plugins_file)
-        while IFS= read -r key; do
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${key}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
+        while IFS= read -r KEY; do
+            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
             zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo -e "Upgrade for '${BOLD}${key}${NC}' completed successfully."
+            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
             echo -e ${BLUE}"#############################"${NC}
         done <<< "$keys"
         echo -e ${GREEN}"done with updates"${NC}
@@ -321,4 +372,30 @@ jap_plugins() {
                 echo -e "${RED}Error in: $plugins_file${NC}"
             fi
     fi
+}
+
+jip () {
+    if [[ "$1" == "my" ]];then
+        if [[ "$2" == "all" ]];then
+            ifconfig | grep inet | awk '{print $2}'
+        else
+            echo -e "${MAGENTA}${BOLD}$(ifconfig | grep 'inet ' | grep -v 'inet6' | awk '{print $2}' | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | grep -v '^127\.0\.0\.1$' | grep -v '^$')${NC}"
+        fi
+    elif [[ ! "$1" == "" ]];then
+        url="$1"
+        if [[ "$url" =~ ^https?:// ]]; then
+            host=$(echo $url | sed -n 's,^\(https*://\)\([^/]*\).*,\2,p' | cut -d':' -f1)
+        else
+            host=$(echo $url | cut -d':' -f1)
+        fi
+
+        ip=$(ping -c 1 $host | grep PING | awk '{print $3}')
+
+        ip_cleaned=$(echo $ip | tr -d '()')
+        ip_cleaned=$(echo $ip_cleaned | tr -d ':')
+
+        copy_to_clipboard $ip_cleaned
+        echo -e "${BLUE}${BOLD}${ip_cleaned}${NC}"
+    fi
+
 }
