@@ -14,6 +14,7 @@ alias pip="pip3"
 alias pwdc="copy pwd"
 alias install="sudo apt install"
 alias update="sudo apt update"
+alias upgrade="sudo apt upgrade"
 alias md="mkdir"
 alias pyv="py --version"
 alias rd="cd /"
@@ -45,7 +46,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.7.2"
+VERSION="v0.7.3"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -210,25 +211,26 @@ ziper() {
     name="$(basename "$1")"
     filename="${name%.*}"
     if [[ $folder == "" ]];then
-        folder="$(pwd)"
+        folder="./"
     fi
 
     if file -b "$select" | grep -q 'Zip archive'; then
-          if [[ ! $folder == "" ]];then
-            unzip $select -d $folder
-            return 0;
+          if [[ "$2" == "" ]];then
+                unzip $select
+                return 0;
+            else
+                unzip $select -d $folder
+                return 0
           fi
-          unzip $select
-          return 0
     fi
 
     if [ -d $select ]; then
-        zip -r $select $folder
+        zip -r $filename".zip" $select
     else
     if [[ ! -d $folder ]];then
         mkdir $folder
     fi
-        zip $filename".zip" $select $folder
+        zip -r $filename".zip" $select
     fi
 }
 
