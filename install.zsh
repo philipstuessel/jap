@@ -28,6 +28,8 @@ echo ${GREEN}"add in ~/.zshrc"${NC}
 echo $(mkdir -p ${JAP_FOLDER}config/.jap) ${MAGENTA}"create: .jap folder"${NC}
 echo $(mkdir -p ${JAP_FOLDER}tpl/) ${MAGENTA}"create: tpl folder"${NC}
 echo $(mkdir -p ${JAP_FOLDER}plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
+echo $(curl -o ${JAP_FOLDER}config/config.json https://raw.githubusercontent.com/philipstuessel/jap/main/config/config.json)
+echo $(curl -o ${JAP_FOLDER}config/runs.json https://raw.githubusercontent.com/philipstuessel/jap/main/config/runs.json)
 touch "$HOME/jap/config/.jap/plugins.json"
 echo '{}' > $HOME/jap/config/.jap/plugins.json
 echo "" > $HOME/jap/plugins/source.sh

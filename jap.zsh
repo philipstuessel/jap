@@ -10,13 +10,14 @@ alias home="cd ~"
 alias c="code ."
 alias py="python3"
 alias python="python3"
+alias pyv="py --version"
 alias pip="pip3"
 alias pwdc="copy pwd"
-alias install="sudo apt install"
-alias update="sudo apt update"
-alias upgrade="sudo apt upgrade"
+alias e="edit"
+alias run="jap run"
+alias install="spm i"
+alias update="spm u"
 alias md="mkdir"
-alias pyv="py --version"
 alias rd="cd /"
 
 alias .="cd ."
@@ -46,11 +47,13 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.7.3"
+VERSION="v0.8.0"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
 JAP_FOLDER="$HOME/jap/"
+JAP_config_Json="${JAP_FOLDER}config/config.json"
+tempf="${JAP_FOLDER}temp/"
 
 source $HOME/jap/plugins/source.sh
 
@@ -68,11 +71,17 @@ jap() {
         echo " gi                  create the .gitignore file"
         echo " ip                  "
         echo "  ↳ [url]            give ip from this domain"
-        echo "  ↳  my              give my ip"
+        echo "  ↳  my / local      give my ip"
+        echo ""
         echo " update              update JAP"
         echo " install [plugin]    install the Plugin"
         echo " upgrade             upgrade all Plugins"
         echo "  ↳ [plugin name]    upgrade only this Plugin"
+        echo ""
+        echo " edit [file]         edit JAP files 'config' or 'runs'"
+        echo " run"
+        echo "  ↳ [key]            run this key"
+        echo "  ↳ l                list all runs"
         echo ""
         echo "------------- commands -------------"
         echo " copy [file]         File contents to clipboard"
@@ -86,6 +95,7 @@ jap() {
         echo "  ↳ tpl o            Open the tpl folder"
         echo ""
         echo " ziper [zip file]    unzip and pack ZIP or with url-zip"
+        echo " edit / e [file]     edit this file"
         echo ""
         echo "--------- workflow (alias) ---------"
         echo " alias               commands"
@@ -97,21 +107,25 @@ jap() {
         echo " c                   code ."
         echo " l                   ls -lah"
         echo " s                   source ~/.zshrc"
+        echo " e                   edit"
         echo " sb                  source ~/.bashrc"
         echo " py                  python3"
         echo " rd                  cd /"
         echo " md                  mkdir"
+        echo " run                 jap run"
         echo " cls                 clear"
         echo " pyv                 python3 --version"
         echo " pip                 pip3"
         echo " home                cd ~"
-        echo " update              sudo apt update"
-        echo " install             sudo apt install"
+        echo " update              apt / brew update"
+        echo " upgrade             apt / brew upgrade"
+        echo " install             apt / brew install"
         echo ""
     fi
 
     if [[ "$1" == "update" ]]; then
            zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.zsh)" -- ~/jap
+           source ~/.zshrc
     fi
 
     if [[ "$1" == "gi" ]]; then
@@ -141,15 +155,113 @@ jap() {
     fi
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
-    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    echo "List of installed JAP plugins"
-    echo "-------------------"
-    printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
-    echo "-------------------"
+        plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
+        echo "List of installed JAP plugins"
+        echo "-------------------"
+        printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
+        echo "-------------------"
     fi
 
     if [[ "$1" == "ip" ]];then
         jip "$2" "$3"
+    fi
+
+    if [[ "$1" == "run" ]];then
+        runJson="${JAP_FOLDER}config/runs.json"
+        if [[ "$2" == "l" || "$2" == "list" ]];then
+             echo "Available categories and their commands in '$runJson':"
+             echo ""
+
+            for category in $(jq 'keys[]' $runJson); do
+                category=$(echo $category | tr -d '"')
+                echo "Categories: ${BOLD}$category${NC}"
+                    jq -r ".${category}[]" $runJson | while read cmd; do
+                    echo "  > $cmd"
+                done
+                echo ""
+            done
+        else
+            category="$2"
+            echo -e "${BOLD}'$category'${NC} is runig: "
+            echo ""
+            jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
+                eval "$cmd"
+            done
+
+        fi
+    fi
+
+    if [[ "$1" == "e" || "$1" == "edit" ]];then
+        file="$2"
+        runJson="${JAP_FOLDER}config/runs.json"
+        e="$(jq -r '.editor' $JAP_config_Json)"
+
+        if [[ $file == "runs" ]];then
+            $e $runJson
+        fi
+
+        if [[ $file == "config" ]];then
+            $e $JAP_config_Json
+        fi
+    fi
+}
+
+if jq -e 'has("START")' $JAP_runsJSON >/dev/null;then
+    jap run START
+fi
+
+updateConfig() {
+    url="https://raw.githubusercontent.com/philipstuessel/jap/main/config/config.json"
+    local_file=$JAP_config_Json 
+    temp_file="${tempf}up9383.json"
+    if [ ! -d "${JAP_FOLDER}temp/" ];then
+        md "${JAP_FOLDER}temp/"
+    fi
+
+    merged="${tempf}merged.json"
+    curl -s $url -o $temp_file
+    if ! test -s $local_file; then
+        fetch2 "$HOME/jap/config/" $url
+    fi
+
+    jq -s '.[0] * .[1]' $temp_file $local_file > $merged
+    echo $(cat $merged) > $local_file
+    rm -r $merged
+    rm -r $temp_file
+    echo "Config Synchronization completed."
+}
+
+edit() {
+    editor=$(jq -r .editor $JAP_config_Json)
+    if [[ "$1" == "" ]];then
+        $editor "."
+    else
+        $editor "$1"
+    fi
+}
+
+spm() {
+    local os=$(uname)
+    if [ "$os" = "Darwin" ];then
+        if [[ "$1" == "i" ]];then
+            brew install "$2"
+        fi
+        if [[ "$1" == "u" ]];then
+            brew update
+        fi
+        if [[ "$1" == "ug" ]];then
+            brew upgrade
+        fi
+    elif [ "$os" = "Linux" ];then
+        if [[ "$1" == "i" ]];then
+            sudo apt install "$2"
+        fi
+        if [[ "$1" == "u" ]];then
+            sudo apt update
+        fi
+        if [[ "$1" == "ug" ]];then
+            sudo apt upgrade
+        fi
     fi
 }
 
@@ -202,6 +314,14 @@ t() {
     else    
         mkdir -p "$(pwd)/$folder"
         touch "$1"
+    fi
+}
+
+upgrade() {
+    if jq -e 'has("UPGRADE")' $JAP_runsJSON >/dev/null;then
+        jap run UPGRADE
+    else
+        spm ug
     fi
 }
 
