@@ -8,7 +8,7 @@ fetch ${JAP_FOLDER} ${JAP_FOLDER}/jap.zsh https://raw.githubusercontent.com/phil
 echo $(mkdir -p ${JAP_FOLDER}config/.jap) ${MAGENTA}"create: .jap folder"${NC}
 echo $(mkdir -p ${JAP_FOLDER}tpl/) ${MAGENTA}"create: tpl folder"${NC}
 echo $(mkdir -p ${JAP_FOLDER}plugins/packages/) ${MAGENTA}"create: packages folder"${NC}
-echo $(mkdir -p ${JAP_FOLDER}/config/) ${MAGENTA}"create: config folder"${NC}
+echo $(mkdir -p ${JAP_FOLDER}config/) ${MAGENTA}"create: config folder"${NC}
 touch "$HOME/jap/config/config.json"
 
 jap_runs="https://raw.githubusercontent.com/philipstuessel/jap/main/config/runs.json"

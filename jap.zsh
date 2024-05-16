@@ -47,12 +47,13 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.8.0"
+VERSION="v0.8.1"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
 JAP_FOLDER="$HOME/jap/"
 JAP_config_Json="${JAP_FOLDER}config/config.json"
+JAP_runsJSON="${JAP_FOLDER}config/runs.json"
 tempf="${JAP_FOLDER}temp/"
 
 source $HOME/jap/plugins/source.sh
