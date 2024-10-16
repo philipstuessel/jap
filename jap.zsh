@@ -10,7 +10,7 @@ alias home="cd ~"
 alias c="code ."
 alias py="python3"
 alias python="python3"
-alias pyv="py --version"
+alias pyv="py --version  && echo "" && which python3"
 alias pip="pip3"
 alias pwdc="copy pwd"
 alias e="edit"
@@ -19,6 +19,11 @@ alias install="spm i"
 alias update="spm u"
 alias md="mkdir"
 alias rd="cd /"
+alias dc="docker-compose"
+alias ec="edit -clear"
+alias phpv="php -v && echo "" && which php"
+alias RIP="sudo shutdown now"
+alias restart="sudo reboot"
 
 alias .="cd ."
 alias ..="cd .."
@@ -37,6 +42,14 @@ WHITE='\033[0;37m'
 BOLD='\033[1m'
 UNDERLINE='\033[4m'
 
+LIGHT_RED='\033[1;31m'
+LIGHT_GREEN='\033[1;32m'
+LIGHT_YELLOW='\033[1;33m'
+LIGHT_BLUE='\033[1;34m'
+LIGHT_MAGENTA='\033[1;35m'
+LIGHT_CYAN='\033[1;36m'
+LIGHT_WHITE='\033[1;37m'
+
 BRED='\e[0;41m'
 BGREEN='\e[0;42m'
 BYELLOW='\e[0;43m'
@@ -47,7 +60,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.8.1"
+VERSION="v0.9.0"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -70,6 +83,7 @@ jap() {
         echo " -v                  version"
         echo " help                list the commamds"
         echo " gi                  create the .gitignore file"
+        echo " ha                  create the .htaccess file"
         echo " ip                  "
         echo "  ↳ [url]            give ip from this domain"
         echo "  ↳  my / local      give my ip"
@@ -90,13 +104,18 @@ jap() {
         echo "  ↳ pwd / p          Copy this path to the clipboard"
         echo "  ↳ pwd / p [file]   Copy this file path to the clipboard"
         echo ""
+        echo " paste               Create the file with copy content"
+        echo " paste"
+        echo "   ↳ [file]          Paste the copy content in this file"
+        echo ""
         echo " tpl [folder]        Paste the folder contents"
         echo " tpl"
-        echo "  ↳ tpl l            List all folder template"
-        echo "  ↳ tpl o            Open the tpl folder"
+        echo "  ↳ l                List all folder template"
+        echo "  ↳ o                Open the tpl folder"
         echo ""
-        echo " ziper [zip file]    unzip and pack ZIP or with url-zip"
-        echo " edit / e [file]     edit this file"
+        echo " ziper [zip file]    Unzip and pack ZIP or with url-zip"
+        echo " edit / e [file]     Edit this file"
+        echo " undo                Undo file contents"
         echo ""
         echo "--------- workflow (alias) ---------"
         echo " alias               commands"
@@ -109,18 +128,23 @@ jap() {
         echo " l                   ls -lah"
         echo " s                   source ~/.zshrc"
         echo " e                   edit"
+        echo " ec                  clear and edit"
         echo " sb                  source ~/.bashrc"
         echo " py                  python3"
         echo " rd                  cd /"
         echo " md                  mkdir"
+        echo " dc                  docker-compose"
         echo " run                 jap run"
         echo " cls                 clear"
+        echo " RIP                 sudo shutdown now"
         echo " pyv                 python3 --version"
         echo " pip                 pip3"
+        echo " phpv                php -v"
         echo " home                cd ~"
         echo " update              apt / brew update"
         echo " upgrade             apt / brew upgrade"
         echo " install             apt / brew install"
+        echo " restart             sudo reboot"
         echo ""
     fi
 
@@ -137,6 +161,21 @@ jap() {
         fi
         cp $HOME/jap/.gitignore $(pwd)/
         echo -e $(pwd)"/"${GREEN}".gitignore"${NC}
+    fi
+
+    if [[ "$1" == "ha" ]];then
+        if [ -e "$(pwd)/.htaccess" ];then
+            if [[ "$2" == "-y" ]];then
+                t "$(pwd)/.htaccess"
+                echo -e $(pwd)"/"${GREEN}".htaccess"${NC}
+            else
+                echo -e $RED"There is already a .htaccess in the folder.$NC"
+                echo "Then type '-y' at the end of the command to confirm the selection"
+            fi
+        else
+            t "$(pwd)/.htaccess"
+            echo -e $(pwd)"/"${GREEN}".htaccess"${NC}
+        fi
     fi
 
     if [[ "$1" == "i" || "$1" == "install" ]]; then
@@ -233,11 +272,19 @@ updateConfig() {
 }
 
 edit() {
+    file="$1"
+    if [[ "$1" == "-clear" ]];then
+        file="$2"
+        if [[ -f "$file" ]];then
+            create_undo "$file"
+        fi
+        echo "" > "$file"
+    fi
     editor=$(jq -r .editor $JAP_config_Json)
     if [[ "$1" == "" ]];then
         $editor "."
     else
-        $editor "$1"
+        $editor $file
     fi
 }
 
@@ -269,21 +316,26 @@ spm() {
 copy_to_clipboard() {
     local os=$(uname)
     local clipboard_content="$1"
+    
     if [ "$os" = "Darwin" ]; then
+        # for macOS
         echo "$clipboard_content" | pbcopy
+
     elif [ "$os" = "Linux" ]; then
-        if command -v xclip &> /dev/null
-        then
-            echo "$clipboard_content" | xclip -selection clipboard
-            return 1
+        # for Linux
+        if command -v xclip &> /dev/null; then
+            if [ ! -z "$DISPLAY" ]; then
+                echo "$clipboard_content" | xclip -selection clipboard
+            fi
         else
-            echo -e "${RED}install xclip | sudo apt-get install xclip${NC}"
-            return 0;
+            echo -e "${RED}xclip is not installed. Please install it using:${NC}"
+            echo "sudo apt-get install xclip"
         fi
     else
         echo "Unsupported OS"
     fi
 }
+
 
 copy() {
     if [[ "$1" == "pwd" || "$1" == "p" ]]; then
@@ -301,9 +353,66 @@ copy() {
     else
         copy_to_clipboard "$(cat "$1")"
          if [[ ! $? == null ]]; then
+            copy_temp "$1"
             echo $1' was copied into the clipboard 📋'
         fi
-    fi 
+    fi
+}
+
+copy_temp() {
+    file="$1"
+    if [ ! -e $tempf"copy.txt" ];then
+        t "${tempf}copy.txt"
+    fi
+    cat $file > "${tempf}copy.txt" 
+    filepath="$(readlink -f "$1")"
+    if [ ! -e $tempf"copypath.txt" ];then
+        t "${tempf}copypath.txt"
+    fi
+    echo "$filepath" > "${tempf}copypath.txt"
+}
+
+paste() {
+    if [ ! -e $tempf"undo.txt" ];then
+        t "${tempf}undo.txt"
+    fi
+    if [[ "$1" == "" && -e $tempf"copypath.txt" || "$1" == "-y" ]];then
+        copypath=$(cat $tempf"copypath.txt")
+        name="$(basename "$copypath")"
+        if [[ -e "$(pwd)/$name" && ! "$1" == "-y" ]];then
+            echo -n "This file already exists, do you want to overwrite it (y/n): "
+            read option
+            if [[ "$option" == "n" ]]; then
+                echo ""
+            fi
+        fi
+        t $name
+        cat "${tempf}copy.txt" > "$name" 
+        echo "was added to the $name 📋"
+    else
+        name="$(basename "$1")"
+        echo "$(pwd)/$name" > "${tempf}undo.txt" 
+        cat "$1" >> "${tempf}undo.txt" 
+        cat "${tempf}copy.txt" > "$1" 
+        echo "was added to the $name 📋"
+    fi
+
+}
+
+create_undo() {
+    name="$(basename "$1")"
+    echo "$(pwd)/$name" > "${tempf}undo.txt" 
+    cat "$1" >> "${tempf}undo.txt"
+}
+
+undo() {
+    pathundo=$(awk 'NR==1' "${tempf}undo.txt")
+    if [[ -e "$pathundo" ]];then
+        $(awk 'NR > 1' "${tempf}undo.txt" > "$pathundo")
+        echo "The file have been restored"
+    else
+        echo "Error: File '$pathundo' does not exist!"
+    fi
 }
 
 t() {
@@ -365,6 +474,14 @@ color() {
      echo -e ${CYAN}"- CYAN"${NC}
      echo -e ${BOLD}"- BOLD"${NC}
      echo -e ${UNDERLINE}"- UNDERLINE"${NC}
+     echo "----------- Light Colors"
+     echo -e "${LIGHT_RED}- LIGHT_RED${NC}"
+     echo -e "${LIGHT_GREEN}- LIGHT_GREEN${NC}"
+     echo -e "${LIGHT_YELLOW}- LIGHT_YELLOW${NC}"
+     echo -e "${LIGHT_BLUE}- LIGHT_BLUE${NC}"
+     echo -e "${LIGHT_MAGENTA}- LIGHT_MAGENTA${NC}"
+     echo -e "${LIGHT_CYAN}- LIGHT_CYAN${NC}"
+     echo -e "${LIGHT_WHITE}- LIGHT_WHITE${NC}"
      echo "----------- Backgrounds"
      echo -e ${BRED}"- BRED"${NC}
      echo -e ${BGREEN}"- BGREEN"${NC}
