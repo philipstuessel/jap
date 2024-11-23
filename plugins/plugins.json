@@ -6,5 +6,6 @@
     "japache" : "raw.githubusercontent.com/philipstuessel/japache/main",
     "depotify" : "raw.githubusercontent.com/philipstuessel/depotify/main",
     "phpcfg" : "raw.githubusercontent.com/philipstuessel/phpcfg/main",
-    "pin" : "raw.githubusercontent.com/philipstuessel/pin/main"
+    "pin" : "raw.githubusercontent.com/philipstuessel/pin/main",
+    "bytesafe" : "raw.githubusercontent.com/philipstuessel/bytesafe/main"
 }
