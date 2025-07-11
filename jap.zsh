@@ -60,7 +60,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.9.0"
+VERSION="v0.10.0"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -73,78 +73,92 @@ source $HOME/jap/plugins/source.sh
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
-         echo "JAP 🍜"
-         echo -e ${BOLD}${VERSION}${NC}
+         echo ""
+         echo -e "${YELLOW}      ██╗ █████╗ ██████╗ ${NC}"
+         echo -e "${YELLOW}      ██║██╔══██╗██╔══██╗${NC}"
+         echo -e "${YELLOW}      ██║███████║██████╔╝${NC}"
+         echo -e "${YELLOW} ██   ██║██╔══██║██╔═══╝ ${NC}"
+         echo -e "${YELLOW} ╚█████╔╝██║  ██║██║     ${NC}"
+         echo -e "${YELLOW}  ╚════╝ ╚═╝  ╚═╝╚═╝     ${NC}"
+         echo ""
+         echo -e "JAP 🍜 | ${BOLD}${VERSION}${NC}"
     fi
 
     if [[ "$1" == "help" ]]; then
         echo "Usage: jap [options]"
         echo "Options:"
-        echo " -v                  version"
-        echo " help                list the commamds"
-        echo " gi                  create the .gitignore file"
-        echo " ha                  create the .htaccess file"
-        echo " ip                  "
-        echo "  ↳ [url]            give ip from this domain"
-        echo "  ↳  my / local      give my ip"
-        echo ""
-        echo " update              update JAP"
-        echo " install [plugin]    install the Plugin"
-        echo " upgrade             upgrade all Plugins"
-        echo "  ↳ [plugin name]    upgrade only this Plugin"
-        echo ""
-        echo " edit [file]         edit JAP files 'config' or 'runs'"
-        echo " run"
-        echo "  ↳ [key]            run this key"
-        echo "  ↳ l                list all runs"
+        echo " -v                     version"
+        echo " help                   list the commamds"
+        echo " gi                     create the .gitignore file"
+        echo " ha                     create the .htaccess file"
+        echo " ip                     "
+        echo "  ↳ [url]               give ip from this domain"
+        echo "  ↳  my / local         give my ip"
+        echo ""   
+        echo " update                 update JAP"
+        echo " install [plugin]       install the Plugin"
+        echo " upgrade                upgrade all Plugins"
+        echo "  ↳ [plugin name]       upgrade only this Plugin"
+        echo ""   
+        echo " edit [file]            edit JAP files 'config' or 'runs'"
+        echo " run"   
+        echo "  ↳ [key]               run this key"
+        echo "  ↳ l                   list all runs"
         echo ""
         echo "------------- commands -------------"
-        echo " copy [file]         File contents to clipboard"
-        echo " copy"
-        echo "  ↳ pwd / p          Copy this path to the clipboard"
-        echo "  ↳ pwd / p [file]   Copy this file path to the clipboard"
+        echo " copy [file]            File contents to clipboard"
+        echo " copy"      
+        echo "  ↳ pwd / p             Copy this path to the clipboard"
+        echo "  ↳ pwd / p [file]      Copy this file path to the clipboard"
+        echo "  ↳ ssh                 Copy id_rsa"
+        echo "  ↳ ssh -pub            Copy id_rsa.pub"
+        echo "  ↳ ssh -id [id]        Copy a special id"
+        echo ""   
+        echo " paste                  Create the file with copy content"
+        echo " paste"     
+        echo "   ↳ [file]             Paste the copy content in this file"
+        echo ""   
+        echo " tpl [folder]           Paste the folder contents"
+        echo " tpl"   
+        echo "  ↳ l                   List all folder template"
+        echo "  ↳ o                   Open the tpl folder"
+        echo ""   
+        echo " ziper [zip file]       Unzip and pack ZIP or with url-zip"
+        echo " edit / e [file]        Edit this file"
+        echo " undo                   Undo file contents"
         echo ""
-        echo " paste               Create the file with copy content"
-        echo " paste"
-        echo "   ↳ [file]          Paste the copy content in this file"
-        echo ""
-        echo " tpl [folder]        Paste the folder contents"
-        echo " tpl"
-        echo "  ↳ l                List all folder template"
-        echo "  ↳ o                Open the tpl folder"
-        echo ""
-        echo " ziper [zip file]    Unzip and pack ZIP or with url-zip"
-        echo " edit / e [file]     Edit this file"
-        echo " undo                Undo file contents"
+        echo " nrq                    Needs Reboot Query"
+        echo " jip                    Get the IP from a domain or local"
+        echo " var [option] [value]   Get the value of an option"
         echo ""
         echo "--------- workflow (alias) ---------"
-        echo " alias               commands"
-        echo ""
-        echo " ..                  cd .."
-        echo " q                   killall Terminal"
-        echo " t                   touch"
-        echo " o                   open ."
-        echo " c                   code ."
-        echo " l                   ls -lah"
-        echo " s                   source ~/.zshrc"
-        echo " e                   edit"
-        echo " ec                  clear and edit"
-        echo " sb                  source ~/.bashrc"
-        echo " py                  python3"
-        echo " rd                  cd /"
-        echo " md                  mkdir"
-        echo " dc                  docker-compose"
-        echo " run                 jap run"
-        echo " cls                 clear"
-        echo " RIP                 sudo shutdown now"
-        echo " pyv                 python3 --version"
-        echo " pip                 pip3"
-        echo " phpv                php -v"
-        echo " home                cd ~"
-        echo " update              apt / brew update"
-        echo " upgrade             apt / brew upgrade"
-        echo " install             apt / brew install"
-        echo " restart             sudo reboot"
+        echo " alias                  commands"
+        echo ""   
+        echo " ..                     cd .."
+        echo " q                      killall Terminal"
+        echo " t                      touch"
+        echo " o                      open ."
+        echo " c                      code ."
+        echo " l                      ls -lah"
+        echo " s                      source ~/.zshrc"
+        echo " e                      edit"
+        echo " ec                     clear and edit"
+        echo " sb                     source ~/.bashrc"
+        echo " py                     python3"
+        echo " rd                     cd /"
+        echo " md                     mkdir"
+        echo " dc                     docker-compose"
+        echo " run                    jap run"
+        echo " cls                    clear"
+        echo " RIP                    sudo shutdown now"
+        echo " pyv                    python3 --version"
+        echo " pip                    pip3"
+        echo " phpv                   php -v"
+        echo " home                   cd ~"
+        echo " update                 apt / brew update"
+        echo " upgrade                apt / brew upgrade"
+        echo " install                apt / brew install"
+        echo " restart                sudo reboot"
         echo ""
     fi
 
@@ -328,8 +342,11 @@ copy_to_clipboard() {
                 echo "$clipboard_content" | xclip -selection clipboard
             fi
         else
-            echo -e "${RED}xclip is not installed. Please install it using:${NC}"
-            echo "sudo apt-get install xclip"
+            if xset q >/dev/null 2>&1; then
+                echo "X11 läuft – Desktop vorhanden"
+                echo -e "${RED}xclip is not installed. Please install it using:${NC}"
+                echo "sudo apt-get install xclip"
+            fi
         fi
     else
         echo "Unsupported OS"
@@ -338,6 +355,36 @@ copy_to_clipboard() {
 
 
 copy() {
+    if [[ "$1" == "ssh" ]]; then
+        if [[ $(var "id" "$@") != 0 ]];then
+            key=$(var "id" "$@")
+            if [[ ! -e "$HOME/.ssh/$key" ]];then
+                echo -e "${RED}SSH key not found${NC}"
+                return 1
+            fi
+            if [[ $(var "pub" "$@") != 0 ]];then
+                echo -e "${LIGHT_BLUE}Copy $key.pub"
+                copy_to_clipboard "$(cat "$HOME/.ssh/$key.pub")"
+            else
+                echo -e "${LIGHT_BLUE}Copy $key"
+                copy_to_clipboard "$(cat "$HOME/.ssh/$key")"
+            fi
+        else
+            if [[ -e "$HOME/.ssh/id_rsa" ]];then
+                if [[ $(var "pub" "$@") != 0 ]];then
+                    echo -e "${LIGHT_BLUE}Copy id_rsa.pub"
+                    copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa.pub")"
+                else
+                    echo -e "${LIGHT_BLUE}Copy id_rsa"
+                    copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa")"
+                fi
+            else
+                echo -e "${RED}SSH key not found${NC}"
+                return 1
+            fi
+        fi
+        return 0
+    fi
     if [[ "$1" == "pwd" || "$1" == "p" ]]; then
         if [[ ! "$2" == "" ]]; then
             copy_to_clipboard "$(pwd)/$2"
@@ -351,10 +398,19 @@ copy() {
             fi
         fi
     else
+        if [[ ! -e "$1"  ]]; then
+            echo -e "${RED}File '$1' does not exist!${NC}"
+            return 1
+        fi
+
+        if [[ ! -f "$1" ]]; then
+            echo -e "${RED}The path '$1' is not a file!${NC}"
+            return 1
+        fi
         copy_to_clipboard "$(cat "$1")"
          if [[ ! $? == null ]]; then
             copy_temp "$1"
-            echo $1' was copied into the clipboard 📋'
+            echo -e "${LIGHT_WHITE}${1}${NC} was copied into the clipboard 📋"
         fi
     fi
 }
@@ -376,6 +432,12 @@ paste() {
     if [ ! -e $tempf"undo.txt" ];then
         t "${tempf}undo.txt"
     fi
+    if [[ $(var "v" "$@") != 0 ]];then
+        echo -e "path: ${BOLD}$(cat $tempf"copypath.txt")${NC}"
+        echo ""
+        echo -e "content: ${BOLD}$(cat $tempf"copy.txt")${NC}"
+        return 1
+    fi
     if [[ "$1" == "" && -e $tempf"copypath.txt" || "$1" == "-y" ]];then
         copypath=$(cat $tempf"copypath.txt")
         name="$(basename "$copypath")"
@@ -384,6 +446,7 @@ paste() {
             read option
             if [[ "$option" == "n" ]]; then
                 echo ""
+                return 1
             fi
         fi
         t $name
@@ -396,7 +459,6 @@ paste() {
         cat "${tempf}copy.txt" > "$1" 
         echo "was added to the $name 📋"
     fi
-
 }
 
 create_undo() {
@@ -409,7 +471,8 @@ undo() {
     pathundo=$(awk 'NR==1' "${tempf}undo.txt")
     if [[ -e "$pathundo" ]];then
         $(awk 'NR > 1' "${tempf}undo.txt" > "$pathundo")
-        echo "The file have been restored"
+        copypath=$(cat $tempf"copypath.txt")
+        echo "The file ($pathundo) have been restored"
     else
         echo "Error: File '$pathundo' does not exist!"
     fi
@@ -665,4 +728,28 @@ jip () {
         copy_to_clipboard $ip_cleaned
         echo -e "${BLUE}${BOLD}${ip_cleaned}${NC}"
     fi
+}
+
+var() {
+  local option="$1"
+  local value="$2"
+  if [[ -z "$value" ]]; then
+    echo 0
+    return
+  fi
+  if [[ " $@ " == *" -$option "* ]]; then
+    local option_value=$(echo "$@" | awk -v option="-$option" '{for(i=1;i<=NF;i++) if ($i == option) print $(i+1)}')
+    echo "$option_value"
+  else
+    echo 0 
+  fi
+}
+
+# Needs Reboot Query
+nrq() {
+	if [ -f /var/run/reboot-required ]; then
+    echo -e "${RED}Reboot required${NC}"
+	else
+    echo -e "${GREEN}No reboot needed${NC}"
+	fi
 }
