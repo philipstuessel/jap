@@ -60,7 +60,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.10.0"
+VERSION="v0.10.1"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -228,17 +228,18 @@ jap() {
 
             for category in $(jq 'keys[]' $runJson); do
                 category=$(echo $category | tr -d '"')
-                echo "Categories: ${BOLD}$category${NC}"
+                echo "${BLUE}Categories:${NC} ${LIGHT_GREEN}$category${NC}"
                     jq -r ".${category}[]" $runJson | while read cmd; do
-                    echo "  > $cmd"
+                    echo "${BOLD}> $cmd${NC}"
                 done
                 echo ""
             done
         else
             category="$2"
-            echo -e "${BOLD}'$category'${NC} is runig: "
-            echo ""
+            echo -e ">${LIGHT_GREEN} $category${NC} is running: "
             jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
+                echo "> $cmd"
+                echo ""
                 eval "$cmd"
             done
 
