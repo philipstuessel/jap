@@ -7,5 +7,6 @@
     "depotify" : "raw.githubusercontent.com/philipstuessel/depotify/main",
     "phpcfg" : "raw.githubusercontent.com/philipstuessel/phpcfg/main",
     "pin" : "raw.githubusercontent.com/philipstuessel/pin/main",
-    "bytesafe" : "raw.githubusercontent.com/philipstuessel/bytesafe/main"
+    "bytesafe" : "raw.githubusercontent.com/philipstuessel/bytesafe/main",
+    "deployup" : "raw.githubusercontent.com/philipstuessel/deployup/main"
 }
