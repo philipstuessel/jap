@@ -60,7 +60,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.10.1"
+VERSION="v0.10.2"
 
 PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
 
@@ -228,15 +228,20 @@ jap() {
 
             for category in $(jq 'keys[]' $runJson); do
                 category=$(echo $category | tr -d '"')
-                echo "${BLUE}Categories:${NC} ${LIGHT_GREEN}$category${NC}"
+                echo -e "${BLUE}Categories:${NC} ${LIGHT_GREEN}$category${NC}"
                     jq -r ".${category}[]" $runJson | while read cmd; do
-                    echo "${BOLD}> $cmd${NC}"
+                    echo -e "${BOLD}> $cmd${NC}"
                 done
                 echo ""
             done
         else
             category="$2"
-            echo -e ">${LIGHT_GREEN} $category${NC} is running: "
+            if ! jq -e ". | has(\"$category\")" "$runJson" > /dev/null; then
+                echo -e "${RED}Error:${NC} category '${category}' not found in ${runJson}"
+                return 1
+            fi
+
+            echo -e ">${LIGHT_GREEN} $category${NC} is running:"
             jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
                 echo "> $cmd"
                 echo ""
@@ -344,7 +349,6 @@ copy_to_clipboard() {
             fi
         else
             if xset q >/dev/null 2>&1; then
-                echo "X11 läuft – Desktop vorhanden"
                 echo -e "${RED}xclip is not installed. Please install it using:${NC}"
                 echo "sudo apt-get install xclip"
             fi
@@ -749,8 +753,8 @@ var() {
 # Needs Reboot Query
 nrq() {
 	if [ -f /var/run/reboot-required ]; then
-    echo -e "${RED}Reboot required${NC}"
+        echo -e "${RED}Reboot required${NC}"
 	else
-    echo -e "${GREEN}No reboot needed${NC}"
+        echo -e "${GREEN}No reboot needed${NC}"
 	fi
 }
