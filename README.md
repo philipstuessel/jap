@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://japzsh.com/plugin/images/jap-logo.png" width="25%" />
+<img src="./images/jap-logo.png" width="40%" />
 </p>
 
 # JAP – Modular Terminal Automation Framework
