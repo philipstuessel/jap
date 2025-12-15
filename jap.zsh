@@ -69,6 +69,7 @@ JAP_config_Json="${JAP_FOLDER}config/config.json"
 JAP_runsJSON="${JAP_FOLDER}config/runs.json"
 tempf="${JAP_FOLDER}temp/"
 lib="${JAP_FOLDER}lib/"
+libraries="${JAP_FOLDER}plugins/libraries"
 
 sourcePlugins() {
     base="$HOME/jap/plugins/packages"
@@ -536,53 +537,101 @@ tpl() {
 
 installPlugin() {
     KEY="${1}"
-    if curl -sSL "$PLUGIN_URL" | grep -q "\"${KEY}\""; then
-        installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-        echo -e "${BOLD}JAP 🍜 Plugins${NC}"
+    if [[  -e "${JAP_FOLDER}plugins/packages/$KEY" ]]; then
+        echo "Plugin already installed"
+        return 0
+    fi
+    if searchPlugin "$KEY";then
+        installURL=$FOUND_URL
+        echo "found in the library: $FOUND_LIBURL"
         echo -e "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
         echo -e "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
-        echo "source $HOME/jap/plugins/packages/$KEY/$KEY.zsh" >> $HOME/jap/plugins/source.sh
-        source $HOME/jap/plugins/source.sh
-        jap_plugins "add" $KEY "$KEY.zsh"
+        if [[ $? -eq 0 ]]; then
+            sourcePlugins
+            return 0
+        else
+            echo -e "${RED}Installation failed${NC}"
+            return 1
+        fi
     else
         echo -e "${RED}The plugin \"$KEY\" was not found${NC}"
+        return 0
     fi
 }
 
-updatePlugin() {
-    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
-        if [[ "$1" == "" ]];then
-        echo "JAP 🍜 Upgrade Plugins"
-        keys=$(jq -r 'keys[]' $plugins_file)
-        while IFS= read -r KEY; do
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
-            echo -e ${BLUE}"#############################"${NC}
-        done <<< "$keys"
-        echo -e ${GREEN}"done with updates"${NC}
-        source $HOME/jap/plugins/source.sh
-        else
-            KEY="$1"
-            if ! jq -e --arg key "$KEY" 'has($key)' $plugins_file >/dev/null; then
-                echo -e "${RED}No plugins with the name '${KEY}' found${NC}"
-                return 0
-            fi
-            echo "JAP 🍜 Upgrade '${KEY}'"
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            if [ -z "$installURL" ]; then
-                echo -e "${RED}Install error (${installURL})${NC}"
-                return 0
-            fi
-            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
-            echo -e ${GREEN}"${BOLD}${KEY}${NC}${GREEN} has been updated"${NC}
-            source $HOME/jap/plugins/source.sh
+searchPlugin() {
+    KEY="$1"
+    FOUND_URL=""
+    FOUND_LIBURL=""
+
+    if [[ ! -f "$libraries" ]]; then
+        echo "Creating libraries file..."
+        mkdir -p "$(dirname "$libraries")"
+        touch "$libraries"
+        echo "https://japzsh.com/library.json" > "$libraries"
+    fi
+
+    for liburl in $(cat "$libraries"); do
+        url=$(curl -fs "$liburl" </dev/null | \
+              grep -o "\"$KEY\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | \
+              sed 's/.*: "\(.*\)"/\1/')
+        if [[ -n "$url" ]]; then
+            FOUND_URL="$url"
+            FOUND_LIBURL="$liburl"
+            return 0
         fi
+    done
+    return 1
+}
+
+updatePlugin() {
+    base="$HOME/jap/plugins/packages"
+    if [[ "$1" == "" ]];then
+        echo "Upgrade list:"
+        for d in "$base"/*; do
+            name=$(basename "$d")
+            if [[ -f "$d/$name.zsh" ]]; then
+                echo -e "${BLUE}$name${NC}"
+            fi
+        done
+        notfoundInlibraries=""
+        echo ""
+        echo "######## Upgrade all plugins ########"
+        echo ""
+        for d in "$base"/*; do
+            name=$(basename "$d")
+                if searchPlugin "$name"; then
+                    echo "[$FOUND_LIBURL] $FOUND_URL"
+                    zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
+                    if [ $? -eq 0 ]; then
+                        echo -e "Upgrade for '$name' completed ${LIGHT_GREEN}successfully.${NC}"
+                        echo -e ${BLUE}"##########################################################"${NC}
+                    else
+                        echo -e "${RED}Upgrade for '$name' failed.${NC}"
+                    fi
+                else
+                    notfoundInlibraries="${notfoundInlibraries}${YELLOW}Plugin '$name' not found in libraries${NC}\n"
+                fi
+        done
+        echo -e "$notfoundInlibraries"
+        echo -e ${GREEN}"done with updates"${NC}
+        sourcePlugins
+        return 0
     else
-        echo -e ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
+        KEY="$1"
+        if searchPlugin "$KEY"; then
+            echo "[$FOUND_LIBURL] $FOUND_URL"
+            zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
+            if [ $? -eq 0 ]; then
+                echo -e "Upgrade for '$KEY' completed ${LIGHT_GREEN}successfully.${NC}"
+            else
+                echo -e "${RED}Upgrade for '$KEY' failed.${NC}"
+            fi
+        else
+            echo -e "${RED}The plugin \"$KEY\" was not found${NC}"
+            return 0
+        fi
     fi
 }
 
@@ -624,32 +673,15 @@ fetch2() {
 }
 
 jap_plugins() {
-    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    if [[ "$1" == "add" ]];then
-        jq --arg key "$2" --arg val "$3" '. += { ($key): $val }' $plugins_file > temp && mv temp $plugins_file
-    fi
     if [[ "$1" == "r" ]]; then
-            pname="$2"
-            file=$(jq ".$2" $plugins_file | tr -d '"')
-            if [[ ! $file == null ]]; then
-                echo -e "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
-                file_source="${JAP_FOLDER}plugins/source.sh"
-                value_source="${JAP_FOLDER}plugins/packages/${pname}/${file}"
-                echo "---------------------------------------------------------"
-                grep -v "source $value_source" $file_source > temp && mv temp $file_source
-                echo "🗑️  Plugins have been removed from source.sh"
-                echo "---------------------------------------------------------"
-                rm -r "${JAP_FOLDER}plugins/packages/${pname}/"
-                echo "🗑️  $value_source have been removed from 'packages'"
-                echo "---------------------------------------------------------"
-                jq --arg key "$pname" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
-                echo "🗑️  $2 have been removed from plugins.json"
-                echo "---------------------------------------------------------"
-                echo -e "${BGREEN}the plugin '$2' has been deleted${NC}"
-            else
-                echo -e "${RED}Is not in plugins.json${NC}"
-                echo -e "${RED}Error in: $plugins_file${NC}"
-            fi
+        pname="$2"
+        if [[ -d "${JAP_FOLDER}plugins/packages/${pname}" ]]; then
+            rm -r "${JAP_FOLDER}plugins/packages/${pname}"
+            sourcePlugins
+            echo -e "${BGREEN}the plugin '$2' has been deleted${NC} 🗑️"
+        else
+            echo -e "${RED}Plugin not found${NC}"
+        fi
     fi
 }
 
