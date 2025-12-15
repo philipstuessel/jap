@@ -706,6 +706,7 @@ pull_check() {
     return 0
 }
 
+pull_core() {
     if [[ -z "$2" ]]; then
         DIR=$(pwd)
     else
