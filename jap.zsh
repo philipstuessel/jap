@@ -327,19 +327,19 @@ copy() {
                 return 1
             fi
             if [[ $(var "pub" "$@") != 0 ]];then
-                echo -e "${LIGHT_BLUE}Copy $key.pub"
+                echo -e "${LIGHT_BLUE}Copy $key.pub${NC}"
                 copy_to_clipboard "$(cat "$HOME/.ssh/$key.pub")"
             else
-                echo -e "${LIGHT_BLUE}Copy $key"
+                echo -e "${LIGHT_BLUE}Copy $key${NC}"
                 copy_to_clipboard "$(cat "$HOME/.ssh/$key")"
             fi
         else
             if [[ -e "$HOME/.ssh/id_rsa" ]];then
                 if [[ $(var "pub" "$@") != 0 ]];then
-                    echo -e "${LIGHT_BLUE}Copy id_rsa.pub"
+                    echo -e "${LIGHT_BLUE}Copy id_rsa.pub${NC}"
                     copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa.pub")"
                 else
-                    echo -e "${LIGHT_BLUE}Copy id_rsa"
+                    echo -e "${LIGHT_BLUE}Copy id_rsa${NC}"
                     copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa")"
                 fi
             else
