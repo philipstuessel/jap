@@ -178,8 +178,10 @@ jap() {
             done
         else
             category="$2"
+            add=${@:3}
             if [[ "$2" == "local" ]];then
                 category="$3"
+                add=${@:4}
             fi
             if ! jq -e ". | has(\"$category\")" "$runJson" > /dev/null; then
                 echo -e "${RED}Error:${NC} category '${category}' not found in ${runJson}"
@@ -191,7 +193,7 @@ jap() {
             jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
                 echo "> $cmd" 
                 echo ""
-                eval "$cmd ${@:3}"
+                eval "$cmd $add"
             done
 
         fi
