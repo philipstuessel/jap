@@ -148,8 +148,23 @@ jap() {
     fi
 
     if [[ "$1" == "run" ]];then
-        runJson="${JAP_FOLDER}config/runs.json"
-        if [[ "$2" == "l" || "$2" == "list" ]];then
+        local runJson="${JAP_FOLDER}config/runs.json"
+        local list=0
+        if [[ "$2" == "local" ]];then
+            local local_jsuns="$(pwd)/runs.json"
+            if [[ -f "$local_jsuns" ]];then
+                runJson="$local_jsuns"
+            else
+                echo -e "${RED}Local runs.json not found.${NC}"
+                return 1
+            fi
+
+            if [[ "$3" == "l" || "$3" == "list" ]];then
+                list=1
+            fi
+        fi
+
+        if [[ "$2" == "l" || "$2" == "list" || $list == 1 ]];then
              echo "Available categories and their commands in '$runJson':"
              echo ""
 
@@ -163,16 +178,20 @@ jap() {
             done
         else
             category="$2"
+            if [[ "$2" == "local" ]];then
+                category="$3"
+            fi
             if ! jq -e ". | has(\"$category\")" "$runJson" > /dev/null; then
                 echo -e "${RED}Error:${NC} category '${category}' not found in ${runJson}"
                 return 1
             fi
 
             echo -e ">${LIGHT_GREEN} $category${NC} is running:"
+
             jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
-                echo "> $cmd"
+                echo "> $cmd" 
                 echo ""
-                eval "$cmd"
+                eval "$cmd ${@:3}"
             done
 
         fi
