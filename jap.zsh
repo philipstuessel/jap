@@ -70,7 +70,16 @@ JAP_runsJSON="${JAP_FOLDER}config/runs.json"
 tempf="${JAP_FOLDER}temp/"
 lib="${JAP_FOLDER}lib/"
 
-source $HOME/jap/plugins/source.sh
+sourcePlugins() {
+    base="$HOME/jap/plugins/packages"
+    for d in "$base"/*; do
+            name=$(basename "$d")
+        if [[ -f "$d/$name.zsh" ]]; then
+            source "$d/$name.zsh"
+        fi
+    done
+}
+sourcePlugins
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
@@ -136,11 +145,13 @@ jap() {
     fi
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
-        plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-        echo "List of installed JAP plugins"
-        echo "-------------------"
-        printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
-        echo "-------------------"
+        base="$HOME/jap/plugins/packages"
+                for d in "$base"/*; do
+            name=$(basename "$d")
+            if [[ -f "$d/$name.zsh" ]]; then
+                echo -e "${BLUE} $name${NC}"
+            fi
+        done
     fi
 
     if [[ "$1" == "ip" ]];then
