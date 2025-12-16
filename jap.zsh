@@ -62,7 +62,7 @@ NC='\033[0m' # No Color
 
 VERSION="v0.11.0"
 
-PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
+github_url="https://raw.githubusercontent.com/philipstuessel/jap"
 
 JAP_FOLDER="$HOME/jap/"
 JAP_config_Json="${JAP_FOLDER}config/config.json"
@@ -100,7 +100,7 @@ jap() {
     fi
 
     if [[ "$1" == "update" ]]; then
-           zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.zsh)" -- ~/jap
+           zsh -c "$(curl -fsSL $github_url/main/update.zsh)" -- ~/jap
            source ~/.zshrc
     fi
 
@@ -231,7 +231,7 @@ if jq -e 'has("START")' $JAP_runsJSON >/dev/null;then
 fi
 
 updateConfig() {
-    url="https://raw.githubusercontent.com/philipstuessel/jap/main/config/config.json"
+    url="${github_url}/main/config/config.json"
     local_file=$JAP_config_Json 
     temp_file="${tempf}up9383.json"
     if [ ! -d "${JAP_FOLDER}temp/" ];then
