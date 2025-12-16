@@ -34,15 +34,15 @@ I opted for the modular approach.
 ## Installation:
 
 ```shell
-cd ~ && zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"
+cd ~ && zsh -c "$(curl -fsSL https://japzsh.com/install.zsh)"
 ```
 </br>
 
 | Method    | Command                                                                                           |
 | :-------- | :------------------------------------------------------------------------------------------------ |
-| **curl**  | `zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"` |
-| **wget**  | `zsh -c "$(wget -O- https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"`   |
-| **fetch** | `zsh -c "$(fetch -o -https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"` |
+| **curl**  | `zsh -c "$(curl -fsSL https://japzsh.com/install.zsh)"` |
+| **wget**  | `zsh -c "$(wget -O- https://japzsh.com/install.zsh)"`   |
+| **fetch** | `zsh -c "$(fetch -o -https://japzsh.com/install.zsh)"` |
 
 </br>
 
