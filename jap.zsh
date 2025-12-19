@@ -318,7 +318,6 @@ copy_to_clipboard() {
     fi
 }
 
-
 copy() {
     if [[ "$1" == "ssh" ]]; then
         if [[ $(var "id" "$@") != 0 ]];then
