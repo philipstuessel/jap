@@ -1,0 +1,27 @@
+source ${JAP_FOLDER}jap.zsh
+echo "----------- Colors"
+echo -e ${RED}- RED${NC}
+echo -e ${GREEN}"- GREEN"${NC}
+echo -e ${YELLOW}"- YELLOW"${NC}
+echo -e ${BLUE}"- BLUE"${NC}
+echo -e ${MAGENTA}"- MAGENTA"${NC}
+echo -e ${CYAN}"- CYAN"${NC}
+echo -e ${BOLD}"- BOLD"${NC}
+echo -e ${UNDERLINE}"- UNDERLINE"${NC}
+echo "----------- Light Colors"
+echo -e "${LIGHT_RED}- LIGHT_RED${NC}"
+echo -e "${LIGHT_GREEN}- LIGHT_GREEN${NC}"
+echo -e "${LIGHT_YELLOW}- LIGHT_YELLOW${NC}"
+echo -e "${LIGHT_BLUE}- LIGHT_BLUE${NC}"
+echo -e "${LIGHT_MAGENTA}- LIGHT_MAGENTA${NC}"
+echo -e "${LIGHT_CYAN}- LIGHT_CYAN${NC}"
+echo -e "${LIGHT_WHITE}- LIGHT_WHITE${NC}"
+echo "----------- Backgrounds"
+echo -e ${BRED}"- BRED"${NC}
+echo -e ${BGREEN}"- BGREEN"${NC}
+echo -e ${BYELLOW}"- BYELLOW"${NC}
+echo -e ${BBLUE}"- BBLUE"${NC}
+echo -e ${BMAGENTA}"- BMAGENTA"${NC}
+echo -e ${BCYAN}"- BCYAN"${NC}
+echo -e ${BWHITE}"- WHITE"${NC}
+echo "end with NC"
