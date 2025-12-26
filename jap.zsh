@@ -72,12 +72,14 @@ lib="${JAP_FOLDER}lib/"
 libraries="${JAP_FOLDER}plugins/libraries"
 
 sourcePlugins() {
-    base="$HOME/jap/plugins/packages"
-    for d in "$base"/*; do
-            name=$(basename "$d")
-        if [[ -f "$d/$name.zsh" ]]; then
-            source "$d/$name.zsh"
-        fi
+    local base="$HOME/jap/plugins/packages"
+    [[ -d "$base" ]] || return 0
+
+    for d in "$base"/*(N); do
+        [[ -d "$d" ]] || continue
+        local name="${d:t}"
+        local file="$d/$name.zsh"
+        [[ -f "$file" ]] && source "$file"
     done
 }
 sourcePlugins
@@ -147,7 +149,7 @@ jap() {
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
         base="$HOME/jap/plugins/packages"
-                for d in "$base"/*; do
+            for d in "$base"/*(N); do
             name=$(basename "$d")
             if [[ -f "$d/$name.zsh" ]]; then
                 echo -e "${BLUE} $name${NC}"
