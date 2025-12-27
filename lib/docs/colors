@@ -1,3 +1,5 @@
+#!/bin/zsh
+JAP_FOLDER="$HOME/jap/"
 source ${JAP_FOLDER}jap.zsh
 echo "----------- Colors"
 echo -e ${RED}- RED${NC}

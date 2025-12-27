@@ -1,3 +1,4 @@
+#!/bin/zsh
 echo "Usage: jap [options]"
 echo "Options:"
 echo " -v                     version"
