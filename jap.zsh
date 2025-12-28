@@ -494,7 +494,8 @@ ziper() {
 }
 
 color() {
-    zsh "${lib}docs/colors"
+    source "${lib}docs/colors"
+    docsColors
 }
 
 tpl() {
