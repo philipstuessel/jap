@@ -71,18 +71,20 @@ tempf="${JAP_FOLDER}temp/"
 lib="${JAP_FOLDER}lib/"
 libraries="${JAP_FOLDER}plugins/libraries"
 
-sourcePlugins() {
-    local base="$HOME/jap/plugins/packages"
-    [[ -d "$base" ]] || return 0
+sourceInclude() {
+    local base="$1"
+    [ -d "$base" ] || return 0
 
-    for d in "$base"/*(N); do
-        [[ -d "$d" ]] || continue
-        local name="${d:t}"
+    find "$base" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r d; do
+        local name
+        name=$(basename "$d")
         local file="$d/$name.zsh"
-        [[ -f "$file" ]] && source "$file"
+
+        [ -f "$file" ] && source "$file"
     done
 }
-sourcePlugins
+
+sourceInclude "${JAP_FOLDER}plugins/packages"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
@@ -148,12 +150,14 @@ jap() {
     fi
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
-        base="$HOME/jap/plugins/packages"
-            for d in "$base"/*(N); do
+        base="${JAP_FOLDER}plugins/packages"
+        [[ -d "$base" ]] || return 0
+
+        find "$base" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r d; do
+            local name
             name=$(basename "$d")
-            if [[ -f "$d/$name.zsh" ]]; then
-                echo -e "${BLUE} $name${NC}"
-            fi
+            local file="$d/$name.zsh"
+            [ -f "$file" ] && echo -e $BLUE" $name"$NC
         done
     fi
 
@@ -525,7 +529,7 @@ installPlugin() {
         echo -e "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
         if [[ $? -eq 0 ]]; then
-            sourcePlugins
+            sourceInclude "${JAP_FOLDER}plugins/packages"
             return 0
         else
             echo -e "${RED}Installation failed${NC}"
@@ -654,7 +658,7 @@ jap_plugins() {
         pname="$2"
         if [[ -d "${JAP_FOLDER}plugins/packages/${pname}" ]]; then
             rm -r "${JAP_FOLDER}plugins/packages/${pname}"
-            sourcePlugins
+            sourceInclude "${JAP_FOLDER}plugins/packages"
             echo -e "${BGREEN}the plugin '$2' has been deleted${NC} 🗑️"
         else
             echo -e "${RED}Plugin not found${NC}"
