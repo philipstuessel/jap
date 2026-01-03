@@ -101,7 +101,8 @@ echo "==> Installing JAP 🍜"
 mkdir -p "${JAP_FOLDER}"
 install_jap_fetch "${JAP_FOLDER}" "${jap_install_url}jap.zsh"
 
-echo -e "was installed in: ${MAGENTA}$(pwd)${NC}"
+echo -e "${MAGENTA}==> Adding to .zshrc${NC}"
+echo -e "Build directory: ${MAGENTA}$(pwd)${NC}"
 echo "source ${JAP_FOLDER}jap.zsh" >> ~/.zshrc
 
 echo -e "${MAGENTA}==> Creating directories${NC}"
