@@ -75,13 +75,11 @@ sourceInclude() {
     local base="$1"
     [ -d "$base" ] || return 0
 
-    find "$base" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r d; do
-        local name
-        name=$(basename "$d")
-        local file="$d/$name.zsh"
-
+    while IFS= read -r d; do
+        local name=$(basename "$d")
+        file="$d/$name.zsh"
         [ -f "$file" ] && source "$file"
-    done
+    done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
 }
 
 sourceInclude "${JAP_FOLDER}plugins/packages"
@@ -153,12 +151,11 @@ jap() {
         base="${JAP_FOLDER}plugins/packages"
         [[ -d "$base" ]] || return 0
 
-        find "$base" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r d; do
-            local name
-            name=$(basename "$d")
-            local file="$d/$name.zsh"
+        while IFS= read -r d; do
+            local name=$(basename "$d")
+            file="$d/$name.zsh"
             [ -f "$file" ] && echo -e $BLUE" $name"$NC
-        done
+        done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
     fi
 
     if [[ "$1" == "ip" ]];then
