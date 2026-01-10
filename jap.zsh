@@ -594,7 +594,7 @@ updatePlugin() {
         done
         echo -e "$notfoundInlibraries"
         echo -e ${GREEN}"done with updates"${NC}
-        sourcePlugins
+        sourceInclude "${JAP_FOLDER}plugins/packages"
         return 0
     else
         KEY="$1"
