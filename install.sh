@@ -14,10 +14,6 @@ NC='\033[0m' # No Color
 JAP_FOLDER="$HOME/jap/"
 jap_install_url='https://raw.githubusercontent.com/philipstuessel/jap/main/'
 
-if [ -f "$HOME/.zshrc" ]; then
-    source "$HOME/.zshrc"
-fi
-
 check_and_install_dependencies() {
     local deps=(zsh curl jq vim)
     local missing=()
