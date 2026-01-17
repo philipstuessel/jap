@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://japzsh.com/plugin/images/jap-logo.png" width="25%" />
+<img src="./images/jap-logo.png" width="40%" />
 </p>
 
 # JAP – Modular Terminal Automation Framework
@@ -34,15 +34,15 @@ I opted for the modular approach.
 ## Installation:
 
 ```shell
-cd ~ && zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"
+cd ~ && bash -c "$(curl -fsSL https://japzsh.com/install.sh)"
 ```
 </br>
 
 | Method    | Command                                                                                           |
 | :-------- | :------------------------------------------------------------------------------------------------ |
-| **curl**  | `zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"` |
-| **wget**  | `zsh -c "$(wget -O- https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"`   |
-| **fetch** | `zsh -c "$(fetch -o -https://raw.githubusercontent.com/philipstuessel/jap/main/install.zsh)"` |
+| **curl**  | `bash -c "$(curl -fsSL https://japzsh.com/install.sh)"` |
+| **wget**  | `bash -c "$(wget -O- https://japzsh.com/install.sh)"`   |
+| **fetch** | `bash -c "$(fetch -o -https://japzsh.com/install.sh)"` |
 
 </br>
 

@@ -60,16 +60,29 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.10.2"
+VERSION="v0.11.0"
 
-PLUGIN_URL="https://raw.githubusercontent.com/philipstuessel/jap/main/plugins/plugins.json"
+github_url="https://raw.githubusercontent.com/philipstuessel/jap"
 
 JAP_FOLDER="$HOME/jap/"
 JAP_config_Json="${JAP_FOLDER}config/config.json"
 JAP_runsJSON="${JAP_FOLDER}config/runs.json"
 tempf="${JAP_FOLDER}temp/"
+lib="${JAP_FOLDER}lib/"
+libraries="${JAP_FOLDER}plugins/libraries"
 
-source $HOME/jap/plugins/source.sh
+sourceInclude() {
+    local base="$1"
+    [ -d "$base" ] || return 0
+
+    while IFS= read -r d; do
+        local name=$(basename "$d")
+        file="$d/$name.zsh"
+        [ -f "$file" ] && source "$file"
+    done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
+}
+
+sourceInclude "${JAP_FOLDER}plugins/packages"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
@@ -85,85 +98,11 @@ jap() {
     fi
 
     if [[ "$1" == "help" ]]; then
-        echo "Usage: jap [options]"
-        echo "Options:"
-        echo " -v                     version"
-        echo " help                   list the commamds"
-        echo " gi                     create the .gitignore file"
-        echo " ha                     create the .htaccess file"
-        echo " ip                     "
-        echo "  ↳ [url]               give ip from this domain"
-        echo "  ↳  my / local         give my ip"
-        echo ""   
-        echo " update                 update JAP"
-        echo " install [plugin]       install the Plugin"
-        echo " upgrade                upgrade all Plugins"
-        echo "  ↳ [plugin name]       upgrade only this Plugin"
-        echo ""   
-        echo " edit [file]            edit JAP files 'config' or 'runs'"
-        echo " run"   
-        echo "  ↳ [key]               run this key"
-        echo "  ↳ l                   list all runs"
-        echo ""
-        echo "------------- commands -------------"
-        echo " copy [file]            File contents to clipboard"
-        echo " copy"      
-        echo "  ↳ pwd / p             Copy this path to the clipboard"
-        echo "  ↳ pwd / p [file]      Copy this file path to the clipboard"
-        echo "  ↳ ssh                 Copy id_rsa"
-        echo "  ↳ ssh -pub            Copy id_rsa.pub"
-        echo "  ↳ ssh -id [id]        Copy a special id"
-        echo ""   
-        echo " paste                  Create the file with copy content"
-        echo " paste"     
-        echo "   ↳ [file]             Paste the copy content in this file"
-        echo ""   
-        echo " tpl [folder]           Paste the folder contents"
-        echo " tpl"   
-        echo "  ↳ l                   List all folder template"
-        echo "  ↳ o                   Open the tpl folder"
-        echo ""   
-        echo " ziper [zip file]       Unzip and pack ZIP or with url-zip"
-        echo " edit / e [file]        Edit this file"
-        echo " undo                   Undo file contents"
-        echo ""
-        echo " nrq                    Needs Reboot Query"
-        echo " jip                    Get the IP from a domain or local"
-        echo " var [option] [value]   Get the value of an option"
-        echo ""
-        echo "--------- workflow (alias) ---------"
-        echo " alias                  commands"
-        echo ""   
-        echo " ..                     cd .."
-        echo " q                      killall Terminal"
-        echo " t                      touch"
-        echo " o                      open ."
-        echo " c                      code ."
-        echo " l                      ls -lah"
-        echo " s                      source ~/.zshrc"
-        echo " e                      edit"
-        echo " ec                     clear and edit"
-        echo " sb                     source ~/.bashrc"
-        echo " py                     python3"
-        echo " rd                     cd /"
-        echo " md                     mkdir"
-        echo " dc                     docker-compose"
-        echo " run                    jap run"
-        echo " cls                    clear"
-        echo " RIP                    sudo shutdown now"
-        echo " pyv                    python3 --version"
-        echo " pip                    pip3"
-        echo " phpv                   php -v"
-        echo " home                   cd ~"
-        echo " update                 apt / brew update"
-        echo " upgrade                apt / brew upgrade"
-        echo " install                apt / brew install"
-        echo " restart                sudo reboot"
-        echo ""
+        zsh "${lib}docs/help"
     fi
 
     if [[ "$1" == "update" ]]; then
-           zsh -c "$(curl -fsSL https://raw.githubusercontent.com/philipstuessel/jap/main/update.zsh)" -- ~/jap
+           zsh -c "$(curl -fsSL $github_url/main/update.zsh)" -- ~/jap
            source ~/.zshrc
     fi
 
@@ -209,11 +148,14 @@ jap() {
     fi
 
     if [[ "$1" == "l" || "$1" == "list" ]];then
-        plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-        echo "List of installed JAP plugins"
-        echo "-------------------"
-        printf -- "-${BLUE} %s${NC}\n" $(jq -r 'keys[]' $plugins_file)
-        echo "-------------------"
+        base="${JAP_FOLDER}plugins/packages"
+        [[ -d "$base" ]] || return 0
+
+        while IFS= read -r d; do
+            local name=$(basename "$d")
+            file="$d/$name.zsh"
+            [ -f "$file" ] && echo -e $BLUE" $name"$NC
+        done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
     fi
 
     if [[ "$1" == "ip" ]];then
@@ -221,8 +163,23 @@ jap() {
     fi
 
     if [[ "$1" == "run" ]];then
-        runJson="${JAP_FOLDER}config/runs.json"
-        if [[ "$2" == "l" || "$2" == "list" ]];then
+        local runJson="${JAP_FOLDER}config/runs.json"
+        local list=0
+        if [[ "$2" == "local" ]];then
+            local local_jsuns="$(pwd)/runs.json"
+            if [[ -f "$local_jsuns" ]];then
+                runJson="$local_jsuns"
+            else
+                echo -e "${RED}Local runs.json not found.${NC}"
+                return 1
+            fi
+
+            if [[ "$3" == "l" || "$3" == "list" ]];then
+                list=1
+            fi
+        fi
+
+        if [[ "$2" == "l" || "$2" == "list" || $list == 1 ]];then
              echo "Available categories and their commands in '$runJson':"
              echo ""
 
@@ -236,16 +193,22 @@ jap() {
             done
         else
             category="$2"
+            add=${@:3}
+            if [[ "$2" == "local" ]];then
+                category="$3"
+                add=${@:4}
+            fi
             if ! jq -e ". | has(\"$category\")" "$runJson" > /dev/null; then
                 echo -e "${RED}Error:${NC} category '${category}' not found in ${runJson}"
                 return 1
             fi
 
             echo -e ">${LIGHT_GREEN} $category${NC} is running:"
+
             jq -r ".${category}[]" "$runJson" | while IFS= read -r cmd; do
-                echo "> $cmd"
+                echo "> $cmd" 
                 echo ""
-                eval "$cmd"
+                eval "$cmd $add"
             done
 
         fi
@@ -271,7 +234,7 @@ if jq -e 'has("START")' $JAP_runsJSON >/dev/null;then
 fi
 
 updateConfig() {
-    url="https://raw.githubusercontent.com/philipstuessel/jap/main/config/config.json"
+    url="${github_url}/main/config/config.json"
     local_file=$JAP_config_Json 
     temp_file="${tempf}up9383.json"
     if [ ! -d "${JAP_FOLDER}temp/" ];then
@@ -358,7 +321,6 @@ copy_to_clipboard() {
     fi
 }
 
-
 copy() {
     if [[ "$1" == "ssh" ]]; then
         if [[ $(var "id" "$@") != 0 ]];then
@@ -368,19 +330,19 @@ copy() {
                 return 1
             fi
             if [[ $(var "pub" "$@") != 0 ]];then
-                echo -e "${LIGHT_BLUE}Copy $key.pub"
+                echo -e "${LIGHT_BLUE}Copy $key.pub${NC}"
                 copy_to_clipboard "$(cat "$HOME/.ssh/$key.pub")"
             else
-                echo -e "${LIGHT_BLUE}Copy $key"
+                echo -e "${LIGHT_BLUE}Copy $key${NC}"
                 copy_to_clipboard "$(cat "$HOME/.ssh/$key")"
             fi
         else
             if [[ -e "$HOME/.ssh/id_rsa" ]];then
                 if [[ $(var "pub" "$@") != 0 ]];then
-                    echo -e "${LIGHT_BLUE}Copy id_rsa.pub"
+                    echo -e "${LIGHT_BLUE}Copy id_rsa.pub${NC}"
                     copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa.pub")"
                 else
-                    echo -e "${LIGHT_BLUE}Copy id_rsa"
+                    echo -e "${LIGHT_BLUE}Copy id_rsa${NC}"
                     copy_to_clipboard "$(cat "$HOME/.ssh/id_rsa")"
                 fi
             else
@@ -533,32 +495,8 @@ ziper() {
 }
 
 color() {
-     echo "----------- Colors"
-     echo -e ${RED}- RED${NC}
-     echo -e ${GREEN}"- GREEN"${NC}
-     echo -e ${YELLOW}"- YELLOW"${NC}
-     echo -e ${BLUE}"- BLUE"${NC}
-     echo -e ${MAGENTA}"- MAGENTA"${NC}
-     echo -e ${CYAN}"- CYAN"${NC}
-     echo -e ${BOLD}"- BOLD"${NC}
-     echo -e ${UNDERLINE}"- UNDERLINE"${NC}
-     echo "----------- Light Colors"
-     echo -e "${LIGHT_RED}- LIGHT_RED${NC}"
-     echo -e "${LIGHT_GREEN}- LIGHT_GREEN${NC}"
-     echo -e "${LIGHT_YELLOW}- LIGHT_YELLOW${NC}"
-     echo -e "${LIGHT_BLUE}- LIGHT_BLUE${NC}"
-     echo -e "${LIGHT_MAGENTA}- LIGHT_MAGENTA${NC}"
-     echo -e "${LIGHT_CYAN}- LIGHT_CYAN${NC}"
-     echo -e "${LIGHT_WHITE}- LIGHT_WHITE${NC}"
-     echo "----------- Backgrounds"
-     echo -e ${BRED}"- BRED"${NC}
-     echo -e ${BGREEN}"- BGREEN"${NC}
-     echo -e ${BYELLOW}"- BYELLOW"${NC}
-     echo -e ${BBLUE}"- BBLUE"${NC}
-     echo -e ${BMAGENTA}"- BMAGENTA"${NC}
-     echo -e ${BCYAN}"- BCYAN"${NC}
-     echo -e ${BWHITE}"- WHITE"${NC}
-     echo "end with NC"
+    source "${lib}docs/colors"
+    docsColors
 }
 
 tpl() {
@@ -577,53 +515,101 @@ tpl() {
 
 installPlugin() {
     KEY="${1}"
-    if curl -sSL "$PLUGIN_URL" | grep -q "\"${KEY}\""; then
-        installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-        echo -e "${BOLD}JAP 🍜 Plugins${NC}"
+    if [[  -e "${JAP_FOLDER}plugins/packages/$KEY" ]]; then
+        echo "Plugin already installed"
+        return 0
+    fi
+    if searchPlugin "$KEY";then
+        installURL=$FOUND_URL
+        echo "found in the library: $FOUND_LIBURL"
         echo -e "${BOLD}The plugin ${YELLOW}\"$KEY\"${NC}${BOLD} will now be installed${NC}"
         echo -e "${BOLD}Install URL: $installURL${NC}"
         zsh -c "$(curl -fsSL $installURL/install.zsh)"
-        echo "source $HOME/jap/plugins/packages/$KEY/$KEY.zsh" >> $HOME/jap/plugins/source.sh
-        source $HOME/jap/plugins/source.sh
-        jap_plugins "add" $KEY "$KEY.zsh"
+        if [[ $? -eq 0 ]]; then
+            sourceInclude "${JAP_FOLDER}plugins/packages"
+            return 0
+        else
+            echo -e "${RED}Installation failed${NC}"
+            return 1
+        fi
     else
         echo -e "${RED}The plugin \"$KEY\" was not found${NC}"
+        return 0
     fi
 }
 
-updatePlugin() {
-    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    if curl -sSL "$PLUGIN_URL" >/dev/null 2>&1; then
-        if [[ "$1" == "" ]];then
-        echo "JAP 🍜 Upgrade Plugins"
-        keys=$(jq -r 'keys[]' $plugins_file)
-        while IFS= read -r KEY; do
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
-            echo -e ${BLUE}"#############################"${NC}
-        done <<< "$keys"
-        echo -e ${GREEN}"done with updates"${NC}
-        source $HOME/jap/plugins/source.sh
-        else
-            KEY="$1"
-            if ! jq -e --arg key "$KEY" 'has($key)' $plugins_file >/dev/null; then
-                echo -e "${RED}No plugins with the name '${KEY}' found${NC}"
-                return 0
-            fi
-            echo "JAP 🍜 Upgrade '${KEY}'"
-            installURL=$(curl -sSL "$PLUGIN_URL" | grep "\"${KEY}\"" | awk -F ': *' '{print $2}' | tr -d '," ')
-            if [ -z "$installURL" ]; then
-                echo -e "${RED}Install error (${installURL})${NC}"
-                return 0
-            fi
-            zsh -c "$(curl -fsSL $installURL/update.zsh)" -- ~/jap
-            echo -e "Upgrade for '${BOLD}${KEY}${NC}' completed successfully."
-            echo -e ${GREEN}"${BOLD}${KEY}${NC}${GREEN} has been updated"${NC}
-            source $HOME/jap/plugins/source.sh
+searchPlugin() {
+    KEY="$1"
+    FOUND_URL=""
+    FOUND_LIBURL=""
+
+    if [[ ! -f "$libraries" ]]; then
+        echo "Creating libraries file..."
+        mkdir -p "$(dirname "$libraries")"
+        touch "$libraries"
+        echo "https://japzsh.com/library.json" > "$libraries"
+    fi
+
+    for liburl in $(cat "$libraries"); do
+        url=$(curl -fs "$liburl" </dev/null | \
+              grep -o "\"$KEY\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | \
+              sed 's/.*: "\(.*\)"/\1/')
+        if [[ -n "$url" ]]; then
+            FOUND_URL="$url"
+            FOUND_LIBURL="$liburl"
+            return 0
         fi
+    done
+    return 1
+}
+
+updatePlugin() {
+    base="$HOME/jap/plugins/packages"
+    if [[ "$1" == "" ]];then
+        echo "Upgrade list:"
+        for d in "$base"/*; do
+            name=$(basename "$d")
+            if [[ -f "$d/$name.zsh" ]]; then
+                echo -e "${BLUE}$name${NC}"
+            fi
+        done
+        notfoundInlibraries=""
+        echo ""
+        echo "######## Upgrade all plugins ########"
+        echo ""
+        for d in "$base"/*; do
+            name=$(basename "$d")
+                if searchPlugin "$name"; then
+                    echo "[$FOUND_LIBURL] $FOUND_URL"
+                    zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
+                    if [ $? -eq 0 ]; then
+                        echo -e "Upgrade for '$name' completed ${LIGHT_GREEN}successfully.${NC}"
+                        echo -e ${BLUE}"##########################################################"${NC}
+                    else
+                        echo -e "${RED}Upgrade for '$name' failed.${NC}"
+                    fi
+                else
+                    notfoundInlibraries="${notfoundInlibraries}${YELLOW}Plugin '$name' not found in libraries${NC}\n"
+                fi
+        done
+        echo -e "$notfoundInlibraries"
+        echo -e ${GREEN}"done with updates"${NC}
+        sourceInclude "${JAP_FOLDER}plugins/packages"
+        return 0
     else
-        echo -e ${RED}"Unable to fetch plugin information from \"$PLUGIN_URL\""${NC}
+        KEY="$1"
+        if searchPlugin "$KEY"; then
+            echo "[$FOUND_LIBURL] $FOUND_URL"
+            zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
+            if [ $? -eq 0 ]; then
+                echo -e "Upgrade for '$KEY' completed ${LIGHT_GREEN}successfully.${NC}"
+            else
+                echo -e "${RED}Upgrade for '$KEY' failed.${NC}"
+            fi
+        else
+            echo -e "${RED}The plugin \"$KEY\" was not found${NC}"
+            return 0
+        fi
     fi
 }
 
@@ -640,45 +626,40 @@ fetch() {
 }
 
 fetch2() {
-    mkdir -p "$1"
-    file="$1/$(basename "$2")"
-    curl -o "$file" "$2" >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "📥 $2"
+    local dest="$1"
+    local url="$2"
+
+    mkdir -p "$dest"
+    file="$dest$(basename "$url")"
+
+    if ! curl -fsI "$url" >/dev/null; then
+        echo -e "${RED}URL not reachable${NC}: $url"
         return 1
+    fi
+
+    echo -e "${YELLOW}Downloading$NC: $url"
+    curl -L --progress-bar "$url" -o "$file"
+    if [ $? -eq 0 ]; then
+        echo -ne "\033[1A\033[2K"
+        echo -ne "\033[1A\033[2K"
+        echo -e "${GREEN}Download completed${NC}: $url"
     else
-        echo -e "❌ ${RED}$2${NC}"
+        echo -ne "\033[1A\033[2K"
+        echo -e "${RED}Error downloading file: $2${NC}"
         return 0
     fi
 }
 
 jap_plugins() {
-    plugins_file="${JAP_FOLDER}config/.jap/plugins.json"
-    if [[ "$1" == "add" ]];then
-        jq --arg key "$2" --arg val "$3" '. += { ($key): $val }' $plugins_file > temp && mv temp $plugins_file
-    fi
     if [[ "$1" == "r" ]]; then
-            pname="$2"
-            file=$(jq ".$2" $plugins_file | tr -d '"')
-            if [[ ! $file == null ]]; then
-                echo -e "${BOLD}Plugin ${BRED}$2${NC}${BOLD} will be removed${NC}"
-                file_source="${JAP_FOLDER}plugins/source.sh"
-                value_source="${JAP_FOLDER}plugins/packages/${pname}/${file}"
-                echo "---------------------------------------------------------"
-                grep -v "source $value_source" $file_source > temp && mv temp $file_source
-                echo "🗑️  Plugins have been removed from source.sh"
-                echo "---------------------------------------------------------"
-                rm -r "${JAP_FOLDER}plugins/packages/${pname}/"
-                echo "🗑️  $value_source have been removed from 'packages'"
-                echo "---------------------------------------------------------"
-                jq --arg key "$pname" 'del(.[$key])' "$plugins_file" > temp && mv temp "$plugins_file"
-                echo "🗑️  $2 have been removed from plugins.json"
-                echo "---------------------------------------------------------"
-                echo -e "${BGREEN}the plugin '$2' has been deleted${NC}"
-            else
-                echo -e "${RED}Is not in plugins.json${NC}"
-                echo -e "${RED}Error in: $plugins_file${NC}"
-            fi
+        pname="$2"
+        if [[ -d "${JAP_FOLDER}plugins/packages/${pname}" ]]; then
+            rm -r "${JAP_FOLDER}plugins/packages/${pname}"
+            sourceInclude "${JAP_FOLDER}plugins/packages"
+            echo -e "${BGREEN}the plugin '$2' has been deleted${NC} 🗑️"
+        else
+            echo -e "${RED}Plugin not found${NC}"
+        fi
     fi
 }
 
@@ -757,4 +738,46 @@ nrq() {
 	else
         echo -e "${GREEN}No reboot needed${NC}"
 	fi
+}
+
+pull_check() {
+    if [ ! -f "$(pwd)/pull-list.json" ]; then
+        echo -e "${RED}pull-list.json File not found${NC}"
+        return 1
+    fi
+    return 0
+}
+
+pull_core() {
+    if [[ -z "$2" ]]; then
+        DIR=$(pwd)
+    else
+        if [ ! -d "$2" ]; then
+            mkdir -p "$2"
+        fi
+        DIR="$2"
+    fi
+
+    fetch2 "$DIR/" "$1"
+}
+
+pull() {
+    if [[ -z "$1" ]]; then
+        echo -e "${RED}Please provide 'all' or a URL to pull.${NC}"
+        echo -e "Usage: pull all or pull <URL> [destination_folder]"
+        return 1
+    fi
+    if [[ "$1" == "all" ]]; then
+        pull_check
+        json=$(cat pull-list.json)
+        urls=$(echo "$json" | jq -r 'to_entries[] | .key + " " + .value')
+        
+        while IFS= read -r url; do
+            key=$(echo "$url" | cut -d ' ' -f 1)
+            value=$(echo "$url" | cut -d ' ' -f 2)
+            pull_core $key $value
+        done <<< "$urls"
+    else
+        pull_core "$1" "$2"
+    fi
 }
