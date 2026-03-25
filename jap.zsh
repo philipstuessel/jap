@@ -60,7 +60,7 @@ BWHITE='\e[0;47m'
 
 NC='\033[0m' # No Color
 
-VERSION="v0.11.0"
+VERSION="v0.12.0"
 
 github_url="https://raw.githubusercontent.com/philipstuessel/jap"
 
@@ -82,7 +82,40 @@ sourceInclude() {
     done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
 }
 
-sourceInclude "${JAP_FOLDER}plugins/packages"
+sourceIncludeLazy() {
+    source "${lib}zinit/zinit.git/zinit.zsh"
+    local base="$1"
+    [ -d "$base" ] || return 0
+
+    while IFS= read -r d; do
+        local name=$(basename "$d")
+        local file="$d/$name.zsh"
+        if [ -f "$file" ]; then
+            zinit ice wait"0" lucid silent
+            zinit snippet "$file"
+        fi
+    done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
+}
+
+IncludeController() {
+    local zinit
+    zinit="$(jq -r '.zinit' "$JAP_config_Json")"
+
+    if [[ "$zinit" == "true" ]]; then
+        local zinit_home="${HOME}/jap/lib/zinit"
+
+        if [[ ! -d "$zinit_home" ]]; then
+            echo "Installing zinit..."
+            ZINIT_HOME="$zinit_home" NO_INPUT=1 bash -c "$(curl -fsSL https://git.io/zinit-install)"
+        fi
+
+        sourceIncludeLazy "$1"
+    else
+        sourceInclude "$1"
+    fi
+}
+
+IncludeController "${JAP_FOLDER}plugins/packages"
 
 jap() {
     if [[ "$1" == "-v" || "$1" == "v" || "$1" == "" ]]; then
