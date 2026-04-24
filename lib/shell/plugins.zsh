@@ -98,6 +98,21 @@ updatePlugin() {
     fi
 }
 
+listPlugins() {
+    local base="${JAP_FOLDER}plugins/packages"
+
+    [[ -d "$base" ]] || return 0
+
+    while IFS= read -r d; do
+        local name
+        local file
+
+        name=$(basename "$d")
+        file="$d/$name.zsh"
+        [[ -f "$file" ]] && echo -e "${BLUE} ${name}${NC}"
+    done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
+}
+
 jap_plugins() {
     if [[ "$1" == "r" ]]; then
         pname="$2"

@@ -125,6 +125,7 @@ install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/swap.zs
 # color
 install_jap_fetch "${JAP_FOLDER}lib/ui/" "${jap_install_url}lib/ui/colors.zsh"
 # utils
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/commands.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/jip.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/pull.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/replace.zsh"

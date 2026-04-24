@@ -1,3 +1,4 @@
 {
-    "editor": "vim"
+    "editor": "vim",
+    "zinit": false
 }

@@ -1,7 +1,5 @@
 #!/bin/zsh
 source ~/.zshrc
-echo ${CYAN}"Update JAP 🍜"${NC}
-echo ${BLUE}">>>>>>>"${NC}
 JAP_FOLDER="$HOME/jap/"
 
 jap_install_url='https://raw.githubusercontent.com/philipstuessel/jap/main/'
@@ -40,6 +38,18 @@ fi
 echo -e "${MAGENTA}==> Updating libraries${NC}"
 fetch2 ${JAP_FOLDER}lib/docs/ ${jap_install_url}lib/docs/help
 fetch2 ${JAP_FOLDER}lib/docs/ ${jap_install_url}lib/docs/colors
+fetch2 ${JAP_FOLDER}lib/core/ ${jap_install_url}lib/core/init.zsh
+fetch2 ${JAP_FOLDER}lib/shell/ ${jap_install_url}lib/shell/aliases.zsh
+fetch2 ${JAP_FOLDER}lib/shell/ ${jap_install_url}lib/shell/fetch.zsh
+fetch2 ${JAP_FOLDER}lib/shell/ ${jap_install_url}lib/shell/navigation.zsh
+fetch2 ${JAP_FOLDER}lib/shell/ ${jap_install_url}lib/shell/plugins.zsh
+fetch2 ${JAP_FOLDER}lib/shell/ ${jap_install_url}lib/shell/swap.zsh
+fetch2 ${JAP_FOLDER}lib/ui/ ${jap_install_url}lib/ui/colors.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/commands.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/jip.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/pull.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/replace.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/ziper.zsh
 
 updateConfig
 
