@@ -113,6 +113,21 @@ install_jap_fetch "${JAP_FOLDER}" "${jap_install_url}LICENSE.txt"
 echo -e "${MAGENTA}==> Installing libraries${NC}"
 install_jap_fetch "${JAP_FOLDER}lib/docs/" "${jap_install_url}lib/docs/help"
 install_jap_fetch "${JAP_FOLDER}lib/docs/" "${jap_install_url}lib/docs/colors"
+# core
+install_jap_fetch "${JAP_FOLDER}lib/core/" "${jap_install_url}lib/core/init.zsh"
+# shell
+install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/aliases.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/fetch.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/navigation.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/plugins.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/shell/" "${jap_install_url}lib/shell/swap.zsh"
+# color
+install_jap_fetch "${JAP_FOLDER}lib/ui/" "${jap_install_url}lib/ui/colors.zsh"
+# utils
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/jip.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/pull.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/replace.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/ziper.zsh"
 echo ""
 echo "! Please restart your terminal or run:"
 echo "      source ~/.zshrc"
