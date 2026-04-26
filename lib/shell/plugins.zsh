@@ -104,12 +104,7 @@ listPlugins() {
     [[ -d "$base" ]] || return 0
 
     while IFS= read -r d; do
-        local name
-        local file
-
-        name=$(basename "$d")
-        file="$d/$name.zsh"
-        [[ -f "$file" ]] && echo -e "${BLUE} ${name}${NC}"
+        [[ -f "$d/$(basename "$d").zsh" ]] && echo -e "${BLUE} $(basename "$d")${NC}"
     done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
 }
 
