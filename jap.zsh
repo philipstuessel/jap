@@ -117,6 +117,9 @@ jap() {
         l|list)
             listPlugins
             ;;
+        libs|libraries)
+            jap_check_libraries
+            ;;
         ip)
             jip "$1" "$2"
             ;;
