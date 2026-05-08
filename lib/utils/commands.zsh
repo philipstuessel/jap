@@ -218,33 +218,18 @@ tpl() {
 }
 
 var() {
-    local option="$1"
-
-    if (( $# > 0 )); then
-        shift
-    fi
-
-    if [[ -z "$option" || $# -eq 0 ]]; then
-        echo 0
-        return 0
-    fi
-
-    while [[ $# -gt 0 ]]; do
-        if [[ "$1" == "-${option}" ]]; then
-            shift
-
-            if [[ $# -gt 0 ]]; then
-                echo "$1"
-            else
-                echo 0
-            fi
-            return 0
-        fi
-
-        shift
-    done
-
+  local option="$1"
+  local value="$2"
+  if [[ -z "$value" ]]; then
     echo 0
+    return
+  fi
+  if [[ " $@ " == *" -$option "* ]]; then
+    local option_value=$(echo "$@" | awk -v option="-$option" '{for(i=1;i<=NF;i++) if ($i == option) print $(i+1)}')
+    echo "$option_value"
+  else
+    echo 0 
+  fi
 }
 
 nrq() {
