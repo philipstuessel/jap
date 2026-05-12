@@ -110,6 +110,27 @@ jap_normalize_plugin_url() {
     echo "$url"
 }
 
+jap_detect_installed_plugins() {
+    local base="$1"
+    local d
+    local name
+
+    typeset -ga JAP_VALID_PLUGINS JAP_INVALID_PLUGINS
+    JAP_VALID_PLUGINS=()
+    JAP_INVALID_PLUGINS=()
+
+    [[ -d "$base" ]] || return 0
+
+    for d in "$base"/*(N/); do
+        name="$(basename "$d")"
+        if [[ -f "$d/$name.zsh" ]]; then
+            JAP_VALID_PLUGINS+=("$name")
+        else
+            JAP_INVALID_PLUGINS+=("$name")
+        fi
+    done
+}
+
 jap_record_library_result() {
     local result_file="$1"
     local kind="$2"
@@ -435,40 +456,67 @@ jap_check_libraries() {
 }
 
 updatePlugin() {
-    base="$HOME/jap/plugins/packages"
+    local base="${JAP_FOLDER}plugins/packages"
+    local name
+    local notfoundInlibraries=""
+
     if [[ "$1" == "" ]];then
+        jap_detect_installed_plugins "$base"
+
+        if (( ${#JAP_INVALID_PLUGINS[@]} > 0 )); then
+            echo -e "${RED}Invalid plugin installations found:${NC}"
+            for name in "${JAP_INVALID_PLUGINS[@]}"; do
+                echo -e "${YELLOW}- ${name}${NC} is missing ${BOLD}${name}.zsh${NC}"
+            done
+            return 1
+        fi
+
+        if (( ${#JAP_VALID_PLUGINS[@]} == 0 )); then
+            echo -e "${RED}No installed plugins found.${NC}"
+            return 1
+        fi
+
         echo "Upgrade list:"
-        for d in "$base"/*; do
-            name=$(basename "$d")
-            if [[ -f "$d/$name.zsh" ]]; then
-                echo -e "${BLUE}$name${NC}"
-            fi
+        for name in "${JAP_VALID_PLUGINS[@]}"; do
+            echo -e "${BLUE}$name${NC}"
         done
-        notfoundInlibraries=""
+
         echo ""
         echo "######## Upgrade all plugins ########"
         echo ""
-        for d in "$base"/*; do
-            name=$(basename "$d")
-                if searchPlugin "$name"; then
-                    echo "[$FOUND_LIBURL] $FOUND_URL"
-                    zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
-                    if [ $? -eq 0 ]; then
-                        echo -e "Upgrade for '$name' completed ${LIGHT_GREEN}successfully.${NC}"
-                        echo -e ${BLUE}"##########################################################"${NC}
-                    else
-                        echo -e "${RED}Upgrade for '$name' failed.${NC}"
-                    fi
+        for name in "${JAP_VALID_PLUGINS[@]}"; do
+            if searchPlugin "$name"; then
+                echo "[$FOUND_LIBURL] $FOUND_URL"
+                zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
+                if [ $? -eq 0 ]; then
+                    echo -e "Upgrade for '$name' completed ${LIGHT_GREEN}successfully.${NC}"
+                    echo -e ${BLUE}"##########################################################"${NC}
                 else
-                    notfoundInlibraries="${notfoundInlibraries}${YELLOW}Plugin '$name' not found in libraries${NC}\n"
+                    echo -e "${RED}Upgrade for '$name' failed.${NC}"
                 fi
+            else
+                notfoundInlibraries="${notfoundInlibraries}${YELLOW}Plugin '$name' not found in libraries${NC}\n"
+            fi
         done
+
         echo -e "$notfoundInlibraries"
         echo -e ${GREEN}"done with updates"${NC}
         sourceInclude "${JAP_FOLDER}plugins/packages"
         return 0
     else
-        KEY="$1"
+        local KEY="$1"
+        local plugin_dir="${base}/${KEY}"
+
+        if [[ ! -d "$plugin_dir" ]]; then
+            echo -e "${RED}The plugin \"$KEY\" is not installed${NC}"
+            return 1
+        fi
+
+        if [[ ! -f "$plugin_dir/$KEY.zsh" ]]; then
+            echo -e "${RED}Invalid plugin installation:${NC} ${YELLOW}$KEY${NC} is missing ${BOLD}$KEY.zsh${NC}"
+            return 1
+        fi
+
         if searchPlugin "$KEY"; then
             echo "[$FOUND_LIBURL] $FOUND_URL"
             zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
