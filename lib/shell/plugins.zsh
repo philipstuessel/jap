@@ -534,13 +534,31 @@ updatePlugin() {
 
 listPlugins() {
     local base="${JAP_FOLDER}plugins/packages"
+    local count=0
+    local plugins=()
 
-    [[ -d "$base" ]] || return 0
+    [[ -d "$base" ]] || {
+        echo -e "No plugins installed."
+        return 0
+    }
 
     while IFS= read -r d; do
-        [[ -f "$d/$(basename "$d").zsh" ]] && echo -e "${BLUE} $(basename "$d")${NC}"
+        if [[ -f "$d/$(basename "$d").zsh" ]]; then
+            plugins+=("$(basename "$d")")
+            ((count++))
+        fi
     done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
+
+    if (( count == 0 )); then
+        echo -e "No plugins installed."
+    else
+        for p in "${plugins[@]}"; do
+            echo -e "${BLUE} $p${NC}"
+        done
+        echo -e "'${BOLD}${count}${NC}' plugin(s) installed"
+    fi
 }
+
 
 jap_plugins() {
     if [[ "$1" == "r" ]]; then
