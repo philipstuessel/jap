@@ -522,6 +522,7 @@ updatePlugin() {
             zsh -c "$(curl -fsSL $FOUND_URL/update.zsh)" -- ~/jap
             if [ $? -eq 0 ]; then
                 echo -e "Upgrade for '$KEY' completed ${LIGHT_GREEN}successfully.${NC}"
+                sourceInclude "${JAP_FOLDER}plugins/packages"
             else
                 echo -e "${RED}Upgrade for '$KEY' failed.${NC}"
             fi
