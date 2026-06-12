@@ -108,7 +108,11 @@ jap_run_command() {
     jq -r --arg category "$category" '.[$category][]' "$run_json" | while IFS= read -r cmd; do
         echo "> $cmd"
         echo ""
-        eval "$cmd$add"
+        if [[ "$cmd" == *'$@'* || "$cmd" == *'$'[1-9]* || "$cmd" == *'${'* ]]; then
+            eval "() { $cmd ; } ${(q)@}"
+        else
+            eval "$cmd$add"
+        fi
     done
 }
 
