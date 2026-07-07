@@ -1,13 +1,23 @@
 jap_show_version() {
+    local g1='\033[38;2;255;223;70m'
+    local g2='\033[38;2;255;205;40m'
+    local g3='\033[38;2;255;185;20m'
+    local g4='\033[38;2;255;160;10m'
+    local g5='\033[38;2;245;140;10m'
+    local g6='\033[38;2;230;120;15m'
+    local dim='\033[38;2;120;120;120m'
+
     echo ""
-    echo -e "${YELLOW}      ██╗ █████╗ ██████╗ ${NC}"
-    echo -e "${YELLOW}      ██║██╔══██╗██╔══██╗${NC}"
-    echo -e "${YELLOW}      ██║███████║██████╔╝${NC}"
-    echo -e "${YELLOW} ██   ██║██╔══██║██╔═══╝ ${NC}"
-    echo -e "${YELLOW} ╚█████╔╝██║  ██║██║     ${NC}"
-    echo -e "${YELLOW}  ╚════╝ ╚═╝  ╚═╝╚═╝     ${NC}"
+    echo -e "${g1}      ██╗ █████╗ ██████╗ ${NC}"
+    echo -e "${g2}      ██║██╔══██╗██╔══██╗${NC}"
+    echo -e "${g3}      ██║███████║██████╔╝${NC}"
+    echo -e "${g4} ██   ██║██╔══██║██╔═══╝ ${NC}"
+    echo -e "${g5} ╚█████╔╝██║  ██║██║     ${NC}"
+    echo -e "${g6}  ╚════╝ ╚═╝  ╚═╝╚═╝     ${NC}"
     echo ""
-    echo -e "JAP 🍜 | ${BOLD}${VERSION}${NC}"
+    echo -e "  ${g3}${BOLD}JAP${NC} 🍜 ${dim}·${NC} ${BOLD}${VERSION}${NC}"
+    echo -e "  ${dim}Modular Terminal Automation Framework${NC}"
+    echo ""
 }
 
 jap_show_help() {
