@@ -49,6 +49,7 @@ fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/commands.zsh
 fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/jip.zsh
 fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/pull.zsh
 fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/replace.zsh
+fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/space.zsh
 fetch2 ${JAP_FOLDER}lib/utils/ ${jap_install_url}lib/utils/ziper.zsh
 
 updateConfig

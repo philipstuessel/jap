@@ -105,6 +105,7 @@ echo "\nsource ${JAP_FOLDER}jap.zsh" >> ~/.zshrc ""
 
 echo -e "${MAGENTA}==> Creating directories${NC}"
 mkdir -p ${JAP_FOLDER}tpl/
+mkdir -p ${JAP_FOLDER}spaces/
 mkdir -p ${JAP_FOLDER}plugins/packages/
 echo -e "${MAGENTA}==> Downloading configuration files${NC}"
 install_jap_fetch "${JAP_FOLDER}config/" "${jap_install_url}config/config.json"
@@ -129,6 +130,7 @@ install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/command
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/jip.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/pull.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/replace.zsh"
+install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/space.zsh"
 install_jap_fetch "${JAP_FOLDER}lib/utils/" "${jap_install_url}lib/utils/ziper.zsh"
 echo ""
 echo "! Please restart your terminal or run:"

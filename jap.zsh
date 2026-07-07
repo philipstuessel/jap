@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-VERSION="v0.12.0"
+VERSION="v1.0.0"
 
 github_url="https://raw.githubusercontent.com/philipstuessel/jap"
 
@@ -8,6 +8,7 @@ JAP_FOLDER="$HOME/jap/"
 JAP_config_Json="${JAP_FOLDER}config/config.json"
 JAP_runsJSON="${JAP_FOLDER}config/runs.json"
 tempf="${JAP_FOLDER}temp/"
+JAP_SPACES="${JAP_FOLDER}spaces/"
 lib="${JAP_FOLDER}lib/"
 libraries="${JAP_FOLDER}plugins/libraries"
 _ZINIT_DECLINED=false
@@ -128,6 +129,9 @@ jap() {
             ;;
         e|edit)
             jap_edit_config "$1"
+            ;;
+        sp|space)
+            jap_space "$@"
             ;;
     esac
 }
