@@ -136,7 +136,11 @@ jap_run_command() {
 
     echo -e ">${LIGHT_GREEN} ${category}${NC} is running:"
 
-    jq -r --arg category "$category" '.[$category][]' "$run_json" | while IFS= read -r cmd; do
+    local -a cmds
+    cmds=("${(@f)$(jq -r --arg category "$category" '.[$category][]' "$run_json")}")
+
+    local cmd
+    for cmd in "${cmds[@]}"; do
         echo "> $cmd"
         echo ""
         if [[ "$cmd" == *'$@'* || "$cmd" == *'$'[1-9]* || "$cmd" == *'${'* ]]; then
