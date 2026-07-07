@@ -44,6 +44,10 @@ jap_space_dir() {
     echo "$space"
 }
 
+jap_space_runs() {
+    echo "$(jap_space_dir)/runs.json"
+}
+
 jap_space() {
     local sub="${1:-}"
     local space project

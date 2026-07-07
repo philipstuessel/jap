@@ -52,18 +52,29 @@ jap_run_command() {
     local list=0
     local category=""
     local add=""
+    local allow_fallback=1
 
-    if [[ "$1" == "local" ]]; then
-        local local_runs_json="$(pwd)/runs.json"
+    if [[ "$1" == "space" ]]; then
+        run_json="$(jap_space_runs)"
+        allow_fallback=0
+        shift
 
-        if [[ -f "$local_runs_json" ]]; then
-            run_json="$local_runs_json"
-        else
-            echo -e "${RED}Local runs.json not found.${NC}"
-            return 1
+        if [[ "$1" == "e" || "$1" == "edit" ]]; then
+            if [[ ! -f "$run_json" ]]; then
+                echo "{}" > "$run_json"
+            fi
+            local editor
+            local -a editor_cmd
+            editor="$(jq -r '.editor' "$JAP_config_Json")"
+            editor_cmd=(${=editor})
+            "${editor_cmd[@]}" "$run_json"
+            return 0
         fi
 
-        shift
+        if [[ ! -f "$run_json" ]]; then
+            echo -e "${RED}No space runs.json found.${NC} Create it with 'jap run space edit'"
+            return 1
+        fi
 
         if [[ "$1" == "l" || "$1" == "list" ]]; then
             list=1
@@ -95,8 +106,18 @@ jap_run_command() {
     fi
 
     if ! jq -e --arg category "$category" '. | has($category)' "$run_json" > /dev/null; then
-        echo -e "${RED}Error:${NC} category '${category}' not found in ${run_json}"
-        return 1
+        local space_runs=""
+        if (( allow_fallback )); then
+            space_runs="$(jap_space_root_for "$(jap_project_root)")/runs.json"
+        fi
+
+        if [[ -n "$space_runs" && -f "$space_runs" ]] && \
+           jq -e --arg category "$category" '. | has($category)' "$space_runs" > /dev/null 2>&1; then
+            run_json="$space_runs"
+        else
+            echo -e "${RED}Error:${NC} category '${category}' not found in global or space runs.json"
+            return 1
+        fi
     fi
 
     if (( $# > 0 )); then
