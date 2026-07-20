@@ -85,6 +85,7 @@ copy() {
 }
 
 copy_temp() {
+    : "${tempf:=$HOME/jap/temp/}"
     file="$1"
     if [ ! -e $tempf"copy.txt" ];then
         t "${tempf}copy.txt"
@@ -98,6 +99,7 @@ copy_temp() {
 }
 
 paste() {
+    : "${tempf:=$HOME/jap/temp/}"
     if [ ! -e $tempf"undo.txt" ];then
         t "${tempf}undo.txt"
     fi
@@ -131,12 +133,14 @@ paste() {
 }
 
 create_undo() {
+    : "${tempf:=$HOME/jap/temp/}"
     name="$(basename "$1")"
     echo "$(pwd)/$name" > "${tempf}undo.txt" 
     cat "$1" >> "${tempf}undo.txt"
 }
 
 undo() {
+    : "${tempf:=$HOME/jap/temp/}"
     pathundo=$(awk 'NR==1' "${tempf}undo.txt")
     if [[ -e "$pathundo" ]];then
         $(awk 'NR > 1' "${tempf}undo.txt" > "$pathundo")
