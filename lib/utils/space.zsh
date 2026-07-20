@@ -73,7 +73,21 @@ jap_space() {
             ;;
         cd)
             space="$(jap_space_dir)"
+            JAP_SPACE_RETURN="$PWD"
             cd "$space" || return 1
+            ;;
+        exit|back)
+            if [[ -z "$JAP_SPACE_RETURN" ]]; then
+                echo -e "${YELLOW}No previous location${NC}"
+                return 1
+            fi
+            if [[ ! -d "$JAP_SPACE_RETURN" ]]; then
+                echo -e "${RED}Previous location no longer exists:${NC} $JAP_SPACE_RETURN"
+                unset JAP_SPACE_RETURN
+                return 1
+            fi
+            cd "$JAP_SPACE_RETURN" || return 1
+            unset JAP_SPACE_RETURN
             ;;
         open|o)
             space="$(jap_space_dir)"
