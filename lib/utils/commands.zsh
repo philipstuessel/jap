@@ -1,0 +1,280 @@
+jap_show_version() {
+    local g1='\033[38;2;255;223;70m'
+    local g2='\033[38;2;255;205;40m'
+    local g3='\033[38;2;255;185;20m'
+    local g4='\033[38;2;255;160;10m'
+    local g5='\033[38;2;245;140;10m'
+    local g6='\033[38;2;230;120;15m'
+    local dim='\033[38;2;120;120;120m'
+
+    echo ""
+    echo -e "${g1}      ██╗ █████╗ ██████╗ ${NC}"
+    echo -e "${g2}      ██║██╔══██╗██╔══██╗${NC}"
+    echo -e "${g3}      ██║███████║██████╔╝${NC}"
+    echo -e "${g4} ██   ██║██╔══██║██╔═══╝ ${NC}"
+    echo -e "${g5} ╚█████╔╝██║  ██║██║     ${NC}"
+    echo -e "${g6}  ╚════╝ ╚═╝  ╚═╝╚═╝     ${NC}"
+    echo ""
+    echo -e "  ${g3}${BOLD}JAP${NC} 🍜 ${dim}·${NC} ${BOLD}${VERSION}${NC}"
+    echo -e "  ${dim}Modular Terminal Automation Framework${NC}"
+    echo ""
+}
+
+jap_show_help() {
+    zsh "${lib}docs/help"
+}
+
+jap_self_update() {
+    zsh -c "$(curl -fsSL "${github_url}/main/update.zsh")" -- ~/jap
+    source ~/.zshrc
+}
+
+jap_create_gitignore() {
+    local gitignore_path="${HOME}/jap/.gitignore"
+
+    if [[ ! -f "$gitignore_path" ]]; then
+        echo -e "Create in ${HOME}/jap/${GREEN}.gitignore${NC}"
+        {
+            echo ".DS_Store"
+            echo "**/.DS_Store"
+        } > "$gitignore_path"
+    fi
+
+    cp "$gitignore_path" "$(pwd)/"
+    echo -e "$(pwd)/${GREEN}/.gitignore${NC}"
+}
+
+jap_create_htaccess() {
+    local target_file="$(pwd)/.htaccess"
+
+    if [[ -e "$target_file" && "$1" != "-y" ]]; then
+        echo -e "${RED}There is already a .htaccess in the folder.${NC}"
+        echo "Then type '-y' at the end of the command to confirm the selection"
+        return 1
+    fi
+
+    t "$target_file"
+    echo -e "$(pwd)/${GREEN}/.htaccess${NC}"
+}
+
+jap_run_command() {
+    local run_json="$JAP_runsJSON"
+    local list=0
+    local category=""
+    local add=""
+    local allow_fallback=1
+
+    if [[ "$1" == "space" ]]; then
+        run_json="$(jap_space_runs)"
+        allow_fallback=0
+        shift
+
+        if [[ "$1" == "e" || "$1" == "edit" ]]; then
+            if [[ ! -f "$run_json" ]]; then
+                echo "{}" > "$run_json"
+            fi
+            local editor
+            local -a editor_cmd
+            editor="$(jq -r '.editor' "$JAP_config_Json")"
+            editor_cmd=(${=editor})
+            "${editor_cmd[@]}" "$run_json"
+            return 0
+        fi
+
+        if [[ ! -f "$run_json" ]]; then
+            echo -e "${RED}No space runs.json found.${NC} Create it with 'jap run space edit'"
+            return 1
+        fi
+
+        if [[ "$1" == "l" || "$1" == "list" ]]; then
+            list=1
+        fi
+    fi
+
+    if [[ "$1" == "l" || "$1" == "list" || $list -eq 1 ]]; then
+        echo "Available categories and their commands in '$run_json':"
+        echo ""
+
+        jq -r 'keys[]' "$run_json" | while IFS= read -r current_category; do
+            echo -e "${BLUE}Categories:${NC} ${LIGHT_GREEN}${current_category}${NC}"
+            jq -r --arg category "$current_category" '.[$category][]' "$run_json" | while IFS= read -r cmd; do
+                echo -e "${BOLD}> $cmd${NC}"
+            done
+            echo ""
+        done
+        return 0
+    fi
+
+    category="$1"
+    if (( $# > 0 )); then
+        shift
+    fi
+
+    if [[ -z "$category" ]]; then
+        echo -e "${RED}Error:${NC} missing run category"
+        return 1
+    fi
+
+    if ! jq -e --arg category "$category" '. | has($category)' "$run_json" > /dev/null; then
+        local space_runs=""
+        if (( allow_fallback )); then
+            space_runs="$(jap_space_root_for "$(jap_project_root)")/runs.json"
+        fi
+
+        if [[ -n "$space_runs" && -f "$space_runs" ]] && \
+           jq -e --arg category "$category" '. | has($category)' "$space_runs" > /dev/null 2>&1; then
+            run_json="$space_runs"
+        else
+            echo -e "${RED}Error:${NC} category '${category}' not found in global or space runs.json"
+            return 1
+        fi
+    fi
+
+    if (( $# > 0 )); then
+        add=" ${(q)@}"
+    fi
+
+    echo -e ">${LIGHT_GREEN} ${category}${NC} is running:"
+
+    local -a cmds
+    cmds=("${(@f)$(jq -r --arg category "$category" '.[$category][]' "$run_json")}")
+
+    local cmd
+    for cmd in "${cmds[@]}"; do
+        echo "> $cmd"
+        echo ""
+        if [[ "$cmd" == *'$@'* || "$cmd" == *'$'[1-9]* || "$cmd" == *'${'* ]]; then
+            eval "() { $cmd ; } ${(q)@}"
+        else
+            eval "$cmd$add"
+        fi
+    done
+}
+
+jap_edit_config() {
+    local file="$1"
+    local editor
+    local -a editor_cmd
+
+    editor="$(jq -r '.editor' "$JAP_config_Json")"
+    editor_cmd=(${=editor})
+
+    if [[ "$file" == "runs" ]]; then
+        "${editor_cmd[@]}" "$JAP_runsJSON"
+        return 0
+    fi
+
+    if [[ "$file" == "config" ]]; then
+        "${editor_cmd[@]}" "$JAP_config_Json"
+        return 0
+    fi
+
+    echo -e "${RED}Error:${NC} only 'runs' or 'config' can be edited here"
+    return 1
+}
+
+updateConfig() {
+    local url="${github_url}/main/config/config.json"
+    local local_file="$JAP_config_Json"
+    local temp_dir="${tempf}"
+    local temp_file="${temp_dir}up9383.json"
+    local merged="${temp_dir}merged.json"
+
+    mkdir -p "${JAP_FOLDER}temp/"
+
+    curl -s "$url" -o "$temp_file"
+
+    if ! test -s "$local_file"; then
+        fetch2 "$HOME/jap/config/" "$url"
+    fi
+
+    jq -s '.[0] * .[1]' "$temp_file" "$local_file" > "$merged"
+    mv "$merged" "$local_file"
+    rm -f "$temp_file"
+    echo "Config Synchronization completed."
+}
+
+spm() {
+    local os
+    os="$(uname)"
+
+    if [[ "$os" == "Darwin" ]]; then
+        if [[ "$1" == "i" ]]; then
+            brew install "$2"
+        fi
+
+        if [[ "$1" == "u" ]]; then
+            brew update
+        fi
+
+        if [[ "$1" == "ug" ]]; then
+            brew upgrade
+        fi
+    elif [[ "$os" == "Linux" ]]; then
+        if [[ "$1" == "i" ]]; then
+            sudo apt install "$2"
+        fi
+
+        if [[ "$1" == "u" ]]; then
+            sudo apt update
+        fi
+
+        if [[ "$1" == "ug" ]]; then
+            sudo apt upgrade
+        fi
+    fi
+}
+
+upgrade() {
+    if jq -e 'has("UPGRADE")' "$JAP_runsJSON" >/dev/null; then
+        jap run UPGRADE
+    else
+        spm ug
+    fi
+}
+
+color() {
+    source "${lib}docs/colors"
+    docsColors
+}
+
+tpl() {
+    if [[ "$1" == "o" ]]; then
+        open ~/jap/tpl/
+        return 0
+    fi
+
+    if [[ "$1" == "l" ]]; then
+        echo -e "${UNDERLINE}---- list all templates ----${NC}"
+        find "$HOME/jap/tpl/" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | while IFS= read -r dir; do
+            echo -e "\033[0;36m${dir}\033[0m"
+        done
+        return 0
+    fi
+
+    cp -r "$HOME/jap/tpl/$1/"* ./
+    echo -e "The template ${GREEN}$1${NC} was added"
+}
+
+var() {
+  local option="$1"
+  local value="$2"
+  if [[ -z "$value" ]]; then
+    echo 0
+    return
+  fi
+  if [[ " $@ " == *" -$option "* ]]; then
+    local option_value=$(echo "$@" | awk -v option="-$option" '{for(i=1;i<=NF;i++) if ($i == option) print $(i+1)}')
+    echo "$option_value"
+  else
+    echo 0 
+  fi
+}
+
+nrq() {
+    if [[ -f /var/run/reboot-required ]]; then
+        echo -e "${RED}Reboot required${NC}"
+    else
+        echo -e "${GREEN}No reboot needed${NC}"
+    fi
+}
