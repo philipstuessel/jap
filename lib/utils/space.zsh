@@ -62,14 +62,14 @@ jap_space() {
                 return 0
             fi
             local d proj
-            for d in "$JAP_SPACES"*(N/); do
+            while IFS= read -r d; do
                 if [[ -f "$d/space.json" ]]; then
                     proj="$(jq -r '.project' "$d/space.json")"
                 else
                     proj="?"
                 fi
                 echo -e "${BLUE}$(basename "$d")${NC}  ${proj}"
-            done
+            done < <(find "$JAP_SPACES" -mindepth 1 -maxdepth 1 -type d)
             ;;
         cd)
             space="$(jap_space_dir)"

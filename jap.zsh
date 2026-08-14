@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-VERSION="v1.0.0"
+VERSION="v1.0.1"
 
 github_url="https://raw.githubusercontent.com/philipstuessel/jap"
 

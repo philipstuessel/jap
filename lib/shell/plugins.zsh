@@ -98,7 +98,7 @@ jap_http_probe() {
         total_time="0"
     fi
 
-    echo "${http_status}\t${total_time}"
+    printf '%s\t%s\n' "$http_status" "$total_time"
 }
 
 jap_normalize_plugin_url() {
@@ -121,14 +121,14 @@ jap_detect_installed_plugins() {
 
     [[ -d "$base" ]] || return 0
 
-    for d in "$base"/*(N/); do
+    while IFS= read -r d; do
         name="$(basename "$d")"
         if [[ -f "$d/$name.zsh" ]]; then
             JAP_VALID_PLUGINS+=("$name")
         else
             JAP_INVALID_PLUGINS+=("$name")
         fi
-    done
+    done < <(find "$base" -mindepth 1 -maxdepth 1 -type d)
 }
 
 jap_record_library_result() {
@@ -292,7 +292,7 @@ jap_render_libraries_progress() {
 }
 
 jap_check_libraries() {
-    setopt localoptions no_bg_nice no_monitor no_notify typeset_silent
+    [[ -n "$ZSH_VERSION" ]] && setopt localoptions no_bg_nice no_monitor no_notify typeset_silent
 
     local tmp_dir
     local -a lib_urls
